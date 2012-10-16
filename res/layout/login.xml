@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp">
+    <EditText android:id="@+id/login_message"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content" />
+    <EditText android:id="@+id/pwd_message"
+              android:password="true"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_below="@id/login_message" />
+    <Button android:id="@+id/canc_btn"
+            android:layout_width="96dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pwd_message"
+            android:layout_alignParentRight="true"
+            android:text="@string/cancel_btn" />
+    <Button android:layout_width="96dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/pwd_message"
+            android:layout_toLeftOf="@id/canc_btn"
+            android:text="@string/login_btn" />
+</RelativeLayout>
+

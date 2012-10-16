@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Crypto Casket</string>
+    <string name="login_text">Login</string>
+    <string name="pwd_text">Password</string>
+    <string name="login_btn">login</string>
+    <string name="cancel_btn">cancel</string>
+</resources>
