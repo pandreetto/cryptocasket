@@ -17,25 +17,73 @@
 package oss.crypto.casket;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 
-public class SecretList extends ListActivity {
+public class SecretList
+    extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        
-        String[] mStrings = new String[20];
-        for (int k=0; k<20; k++) {
-            mStrings[k] = "Test " + k;
-        }
-        
-        setListAdapter(new ArrayAdapter<String>(this,
-                R.layout.secretitem, mStrings));
-        getListView().setTextFilterEnabled(true);
 
-        
+        super.onCreate(savedInstanceState);
+
     }
 
+    @Override
+    public void onStart() {
+
+        super.onStart();
+
+        Intent intent = this.getIntent();
+        String login = intent.getStringExtra(CasketLogin.LOGIN_TAG);
+        String pwd = intent.getStringExtra(CasketLogin.PWD_TAG);
+
+        if (login == null || pwd == null) {
+
+            Log.d(getPackageName(), "No login or pwd");
+
+        } else {
+
+            String[] mStrings = SecretManager.getManager(login, pwd).getSecrets();
+
+            setListAdapter(new ArrayAdapter<String>(this, R.layout.secretitem, mStrings));
+            getListView().setTextFilterEnabled(true);
+        }
+
+    }
+
+    @Override
+    public void onStop() {
+
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+
+        super.onDestroy();
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        menu.add("Add Secret");
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        default:
+            Log.d(getPackageName(), "Selected item: " + item.getTitle());
+            return super.onOptionsItemSelected(item);
+        }
+    }
 }

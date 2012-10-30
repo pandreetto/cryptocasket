@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/pwd_message"
             android:layout_toLeftOf="@id/canc_btn"
-            android:text="@string/login_btn" />
+            android:text="@string/login_btn"
+            android:onClick="login" />
 </RelativeLayout>
 

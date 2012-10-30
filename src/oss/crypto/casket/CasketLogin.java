@@ -17,10 +17,17 @@
 package oss.crypto.casket;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
 
+public class CasketLogin
+    extends Activity {
 
-public class CasketLogin extends Activity {
+    public final static String LOGIN_TAG = "oss.crypto.casket.LOGIN";
+
+    public final static String PWD_TAG = "oss.crypto.casket.PWD";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,6 +35,19 @@ public class CasketLogin extends Activity {
         setContentView(R.layout.login);
     }
 
+    public void login(View loginView) {
+        EditText loginText = (EditText) findViewById(R.id.login_message);
+        String loginName = loginText.getText().toString();
+
+        EditText pwdText = (EditText) findViewById(R.id.pwd_message);
+        String pwd = pwdText.getText().toString();
+
+        Intent intent = new Intent(this, SecretList.class);
+        intent.putExtra(LOGIN_TAG, loginName);
+        intent.putExtra(PWD_TAG, pwd);
+
+        startActivity(intent);
+
+    }
 
 }
-
