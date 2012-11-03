@@ -1,28 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:paddingLeft="16dp"
-                android:paddingRight="16dp">
-    <EditText android:id="@+id/login_message"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content" />
-    <EditText android:id="@+id/pwd_message"
-              android:password="true"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:layout_below="@id/login_message" />
-    <Button android:id="@+id/canc_btn"
-            android:layout_width="96dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/pwd_message"
-            android:layout_alignParentRight="true"
-            android:text="@string/cancel_btn" />
-    <Button android:layout_width="96dp"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/pwd_message"
-            android:layout_toLeftOf="@id/canc_btn"
-            android:text="@string/login_btn"
-            android:onClick="login" />
-</RelativeLayout>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp" >
 
+    <TextView
+        android:id="@+id/login_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/login_text" />
+    
+    <EditText
+        android:id="@+id/login_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_text" />
+
+     <TextView
+        android:id="@+id/pwd_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_message"
+        android:text="@string/pwd_text" />
+
+    <EditText
+        android:id="@+id/pwd_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pwd_text"
+        android:password="true" />
+
+    <Button
+        android:id="@+id/canc_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/pwd_message"
+        android:onClick="goOut"
+        android:text="@string/cancel_btn" />
+
+    <Button
+        android:id="@+id/login_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/pwd_message"
+        android:layout_toLeftOf="@id/canc_btn"
+        android:onClick="login"
+        android:text="@string/login_btn" />
+
+    <Button
+        android:id="@+id/register_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/login_message"
+        android:layout_below="@+id/pwd_message"
+        android:layout_toLeftOf="@+id/login_btn"
+        android:onClick="confirmPwd"
+        android:text="@string/register_btn" />
+
+     <TextView
+        android:id="@+id/repwd_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_btn"
+        android:text="@string/repwd_text"
+        android:visibility="invisible" />
+
+    <EditText
+        android:id="@+id/repwd_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/repwd_text"
+        android:password="true"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/create_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/repwd_message"
+        android:onClick="register"
+        android:text="@string/create_btn"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/discard_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/repwd_message"
+        android:layout_toLeftOf="@+id/create_btn"
+        android:onClick="goOut"
+        android:text="@string/discard_btn"
+        android:visibility="invisible" />
+
+</RelativeLayout>

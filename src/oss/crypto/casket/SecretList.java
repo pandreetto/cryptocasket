@@ -42,6 +42,7 @@ public class SecretList
         Intent intent = this.getIntent();
         String login = intent.getStringExtra(CasketLogin.LOGIN_TAG);
         String pwd = intent.getStringExtra(CasketLogin.PWD_TAG);
+        boolean newSecret = intent.getBooleanExtra(CasketLogin.ACT_TAG, false);
 
         if (login == null || pwd == null) {
 
@@ -49,10 +50,16 @@ public class SecretList
 
         } else {
 
-            String[] mStrings = SecretManager.getManager(login, pwd).getSecrets();
+            try {
 
-            setListAdapter(new ArrayAdapter<String>(this, R.layout.secretitem, mStrings));
-            getListView().setTextFilterEnabled(true);
+                String[] mStrings = SecretManager.getManager(this, login, pwd, newSecret).getSecrets();
+
+                setListAdapter(new ArrayAdapter<String>(this, R.layout.secretitem, mStrings));
+                getListView().setTextFilterEnabled(true);
+
+            } catch (Exception ex) {
+                Log.e(getPackageName(), ex.getMessage());
+            }
         }
 
     }

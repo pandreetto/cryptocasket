@@ -3,6 +3,10 @@
     <string name="app_name">Crypto Casket</string>
     <string name="login_text">Login</string>
     <string name="pwd_text">Password</string>
-    <string name="login_btn">login</string>
-    <string name="cancel_btn">cancel</string>
+    <string name="repwd_text">Confirm password</string>
+    <string name="login_btn">Login</string>
+    <string name="cancel_btn">Cancel</string>
+    <string name="register_btn">Register</string>
+    <string name="create_btn">Create</string>
+    <string name="discard_btn">Discard</string>
 </resources>
