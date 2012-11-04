@@ -16,18 +16,29 @@
 
 package oss.crypto.casket;
 
-import org.xml.sax.Attributes;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
-public interface Secret {
+public class SecretWriter {
 
-    public String getId();
+    private PrintWriter writer;
 
-    public void processStartElement(String qName, Attributes attributes);
+    public SecretWriter(OutputStream out) {
+        writer = new PrintWriter(out);
+        writer.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        writer.println("<secretlist>");
+    }
 
-    public void processEndElement(String qName);
+    /*
+     * TODO check special XML chars
+     */
+    public void write(Secret secret) {
+        String tmps = secret.toXML();
+        writer.println(tmps);
+    }
 
-    public void processText(char[] ch, int start, int length);
-
-    public String toXML();
-
+    public void close() {
+        writer.println("</secretlist>");
+        writer.close();
+    }
 }

@@ -16,24 +16,65 @@
 
 package oss.crypto.casket;
 
-public class PropertySecret implements Secret {
-    
+import org.xml.sax.Attributes;
+
+public class PropertySecret
+    implements Secret {
+
     private String key;
-    
+
     private String value;
-    
-    public PropertySecret(String in) {
-        String[] tmpt = in.split(":");
-        key = tmpt[0].trim();
-        value = tmpt[1].trim();
+
+    private StringBuffer currText;
+
+    public PropertySecret() {
     }
-    
-    public String toString(){
+
+    public String toString() {
         return key + ": " + value;
     }
-    
+
     public String getId() {
         return key;
     }
 
+    public void setId(String id) {
+        key = id;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public void processStartElement(String qName, Attributes attributes) {
+        currText = new StringBuffer();
+    }
+
+    public void processEndElement(String qName) {
+        if (qName.equals("key")) {
+            key = currText.toString().trim();
+        } else {
+            value = currText.toString().trim();
+        }
+        currText = null;
+
+    }
+
+    public void processText(char[] ch, int start, int length) {
+        if (currText != null) {
+            currText.append(ch, start, length);
+        }
+    }
+
+    public String toXML() {
+        StringBuffer buff = new StringBuffer();
+        buff.append("<secret class=\"").append(this.getClass().getName()).append("\">\n");
+        buff.append("<key>").append(key).append("</key>\n");
+        buff.append("<value>").append(value).append("</value>\n</secret>\n");
+        return buff.toString();
+    }
 }

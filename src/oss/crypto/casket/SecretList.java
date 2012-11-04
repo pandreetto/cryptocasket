@@ -58,7 +58,7 @@ public class SecretList
                 getListView().setTextFilterEnabled(true);
 
             } catch (Exception ex) {
-                Log.e(getPackageName(), ex.getMessage());
+                Log.e(getPackageName(), ex.getMessage(), ex);
             }
         }
 

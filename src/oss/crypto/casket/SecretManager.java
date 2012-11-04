@@ -22,7 +22,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -77,65 +76,64 @@ public class SecretManager {
             throw new IOException(ex.getMessage());
         }
     }
-    
-    private ArrayList<Secret> readSecrets() throws IOException {
-        ArrayList<Secret> result = new ArrayList<Secret>();
+
+    private ArrayList<Secret> readSecrets()
+        throws IOException {
+        ArrayList<Secret> result = null;
         BufferedReader reader = null;
         FileInputStream fIn = null;
-        
+
+        SecretParser parser = null;
+
         try {
             Cipher cipher = this.setupCipher(Cipher.DECRYPT_MODE, this.pwd);
             fIn = context.openFileInput(this.login + ".crypto");
             CipherInputStream cIn = new CipherInputStream(fIn, cipher);
             reader = new BufferedReader(new InputStreamReader(cIn));
-            String tmps = reader.readLine();
-            while (tmps != null) {
-                result.add(new PropertySecret(tmps.trim()));
-                tmps = reader.readLine();
-            }
+
+            parser = new SecretParser(reader);
+            parser.parse();
+            result = parser.getSecrets();
+
         } finally {
-            if(reader!=null){
+            if (reader != null) {
                 reader.close();
-            }else if (fIn!=null){
+            } else if (fIn != null) {
                 fIn.close();
             }
         }
         return result;
     }
-    
+
     /*
      * TODO missing rollback
      */
-    private void writeSecrets(ArrayList<Secret> sList) throws IOException {
+    private void writeSecrets(ArrayList<Secret> sList)
+        throws IOException {
         FileOutputStream fOut = null;
-        PrintWriter writer = null;
-        
+        SecretWriter writer = null;
+
         try {
             Cipher cipher = this.setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
-    
+
             fOut = this.context.openFileOutput(login + ".crypto", Context.MODE_PRIVATE);
             CipherOutputStream cOut = new CipherOutputStream(fOut, cipher);
-            writer = new PrintWriter(cOut);
-            
-            for (Secret tmps : sList) {
-                writer.println(tmps.toString());
+            writer = new SecretWriter(cOut);
+
+            for (Secret secItem : sList) {
+                writer.write(secItem);
             }
 
         } finally {
-            if(writer!= null) {
+            if (writer != null) {
                 writer.close();
-            }else if(fOut!=null){
+            } else if (fOut != null) {
                 fOut.close();
             }
         }
-        
-        
+
     }
 
-    
-    
-    
-    
     protected SecretManager(Context ctx, String login, String pwd, boolean create) throws IOException {
 
         this.context = ctx;
@@ -150,19 +148,21 @@ public class SecretManager {
         if (create) {
 
             if (cryptoFile.exists()) {
-                //throw new IOException("Cryptofile already exists");
+                // throw new IOException("Cryptofile already exists");
             }
 
             try {
-                
+
                 ArrayList<Secret> sList = new ArrayList<Secret>(20);
                 for (int k = 0; k < 20; k++) {
-                    Secret tmps = new PropertySecret("Secret[" + k + "]: " + login + "(" + k + ")");
+                    PropertySecret tmps = new PropertySecret();
+                    tmps.setId("Secret[" + k + "]");
+                    tmps.setValue(login + "(" + k + ")");
                     sList.add(tmps);
                 }
-                
+
                 writeSecrets(sList);
-                
+
             } catch (Exception ex) {
                 Log.e(SecretManager.class.getName(), ex.getMessage(), ex);
                 throw new IOException(ex.getMessage());
@@ -174,7 +174,8 @@ public class SecretManager {
 
     }
 
-    public Secret[] getSecrets() throws IOException {
+    public Secret[] getSecrets()
+        throws IOException {
 
         ArrayList<Secret> resList = readSecrets();
         Secret[] result = new Secret[resList.size()];
@@ -183,40 +184,42 @@ public class SecretManager {
 
     }
 
-    public void addSecret(Secret secret) throws IOException {
+    public void addSecret(Secret secret)
+        throws IOException {
         boolean found = false;
         ArrayList<Secret> resList = readSecrets();
-        for(Secret secItem : resList) {
-            if(secret.getId().equals(secItem.getId())){
+        for (Secret secItem : resList) {
+            if (secret.getId().equals(secItem.getId())) {
                 found = true;
                 break;
             }
         }
-        
-        if(!found){
+
+        if (!found) {
             resList.add(secret);
             writeSecrets(resList);
         }
     }
-    
-    public void removeSecret(Secret secret) throws IOException {
+
+    public void removeSecret(Secret secret)
+        throws IOException {
         ArrayList<Secret> resList = readSecrets();
         int idx = 0;
         boolean found = false;
-        for(Secret secItem : resList) {
-            if(secret.getId().equals(secItem.getId())){
+        for (Secret secItem : resList) {
+            if (secret.getId().equals(secItem.getId())) {
                 found = true;
                 break;
             } else {
                 idx++;
             }
         }
-        
-        if(found){
+
+        if (found) {
             resList.remove(idx);
             writeSecrets(resList);
         }
-        
+
     }
 
     private static HashMap<String, SecretManager> managers = new HashMap<String, SecretManager>();
