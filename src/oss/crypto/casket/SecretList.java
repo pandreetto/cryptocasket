@@ -52,9 +52,9 @@ public class SecretList
 
             try {
 
-                String[] mStrings = SecretManager.getManager(this, login, pwd, newSecret).getSecrets();
+                Secret[] secrets = SecretManager.getManager(this, login, pwd, newSecret).getSecrets();
 
-                setListAdapter(new ArrayAdapter<String>(this, R.layout.secretitem, mStrings));
+                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, secrets));
                 getListView().setTextFilterEnabled(true);
 
             } catch (Exception ex) {
