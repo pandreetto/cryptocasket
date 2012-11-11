@@ -184,6 +184,18 @@ public class SecretManager {
 
     }
 
+    public Secret getSecret(String secretId)
+        throws IOException {
+        ArrayList<Secret> resList = readSecrets();
+        for (Secret tmpsec : resList) {
+            if (tmpsec.getId().equals(secretId)) {
+                return tmpsec;
+            }
+        }
+
+        throw new IOException("Cannot find " + secretId);
+    }
+
     public void addSecret(Secret secret)
         throws IOException {
         boolean found = false;

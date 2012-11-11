@@ -9,4 +9,6 @@
     <string name="register_btn">Register</string>
     <string name="create_btn">Create</string>
     <string name="discard_btn">Discard</string>
+    <string name="add_secret">Add secret</string>
+    <string name="rmv_secret">Remove secrets</string>
 </resources>

@@ -31,7 +31,7 @@ public class PropertySecret
     }
 
     public String toString() {
-        return key + ": " + value;
+        return key;
     }
 
     public String getId() {

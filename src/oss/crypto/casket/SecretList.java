@@ -22,10 +22,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 public class SecretList
     extends ListActivity {
+
+    private String login;
+
+    private String password;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,25 +47,26 @@ public class SecretList
         super.onStart();
 
         Intent intent = this.getIntent();
-        String login = intent.getStringExtra(CasketLogin.LOGIN_TAG);
-        String pwd = intent.getStringExtra(CasketLogin.PWD_TAG);
-        boolean newSecret = intent.getBooleanExtra(CasketLogin.ACT_TAG, false);
+        login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
+        password = intent.getStringExtra(CasketConstants.PWD_TAG);
+        boolean newSecret = intent.getBooleanExtra(CasketConstants.ACT_TAG, false);
 
-        if (login == null || pwd == null) {
+        if (login == null || password == null) {
 
-            Log.d(getPackageName(), "No login or pwd");
+            Log.d(getLocalClassName(), "No login or pwd");
 
         } else {
 
             try {
 
-                Secret[] secrets = SecretManager.getManager(this, login, pwd, newSecret).getSecrets();
+                ListView lView = this.getListView();
+                Secret[] secrets = SecretManager.getManager(this, login, password, newSecret).getSecrets();
 
-                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, secrets));
-                getListView().setTextFilterEnabled(true);
+                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, R.id.secret_id, secrets));
+                lView.setTextFilterEnabled(true);
 
             } catch (Exception ex) {
-                Log.e(getPackageName(), ex.getMessage(), ex);
+                Log.e(getLocalClassName(), ex.getMessage(), ex);
             }
         }
 
@@ -80,7 +88,8 @@ public class SecretList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.add("Add Secret");
+        menu.add(R.string.add_secret);
+        menu.add(R.string.rmv_secret);
 
         return true;
     }
@@ -89,8 +98,19 @@ public class SecretList
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         default:
-            Log.d(getPackageName(), "Selected item: " + item.getTitle());
+            Log.d(getLocalClassName(), "Selected item: " + item.getTitle());
             return super.onOptionsItemSelected(item);
         }
     }
+
+    public void selectSecret(View sView) {
+        TextView tView = (TextView) sView;
+        String sId = tView.getText().toString();
+        Intent intent = new Intent(this, SecretActivity.class);
+        intent.putExtra(CasketConstants.LOGIN_TAG, login);
+        intent.putExtra(CasketConstants.PWD_TAG, password);
+        intent.putExtra(CasketConstants.SECID_TAG, sId);
+        startActivity(intent);
+    }
+
 }

@@ -28,12 +28,6 @@ import android.widget.TextView;
 public class CasketLogin
     extends Activity {
 
-    public final static String LOGIN_TAG = "oss.crypto.casket.LOGIN";
-
-    public final static String PWD_TAG = "oss.crypto.casket.PWD";
-
-    public final static String ACT_TAG = "oss.crypto.casket.REGISTER";
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,9 +60,9 @@ public class CasketLogin
         String pwd = pwdText.getText().toString();
 
         Intent intent = new Intent(this, SecretList.class);
-        intent.putExtra(LOGIN_TAG, loginName);
-        intent.putExtra(PWD_TAG, pwd);
-        intent.putExtra(ACT_TAG, false);
+        intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
+        intent.putExtra(CasketConstants.PWD_TAG, pwd);
+        intent.putExtra(CasketConstants.ACT_TAG, false);
 
         startActivity(intent);
 
@@ -105,9 +99,9 @@ public class CasketLogin
 
         if (pwd.equals(rePwd)) {
             Intent intent = new Intent(this, SecretList.class);
-            intent.putExtra(LOGIN_TAG, loginName);
-            intent.putExtra(PWD_TAG, pwd);
-            intent.putExtra(ACT_TAG, true);
+            intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
+            intent.putExtra(CasketConstants.PWD_TAG, pwd);
+            intent.putExtra(CasketConstants.ACT_TAG, true);
 
             startActivity(intent);
         } else {
