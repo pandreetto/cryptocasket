@@ -16,28 +16,26 @@
 
 package oss.crypto.casket;
 
+import java.lang.reflect.Constructor;
+
 import android.content.Context;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.util.Log;
+import android.view.View;
 
-public class PropertySecretView
-    extends LinearLayout {
+public class SecretViewFactory {
 
-    public PropertySecretView(Context ctx, Secret secret) {
-        super(ctx);
+    public static View getSecretView(Secret secret, Context ctx) {
+        try {
 
-        this.setOrientation(HORIZONTAL);
+            String sClassName = secret.getClass().getName() + "View";
+            Class<?> sClass = Class.forName(sClassName);
+            Constructor<?> cTor = sClass.getConstructor(Context.class, Secret.class);
+            return (View) cTor.newInstance(ctx, secret);
 
-        PropertySecret pSecret = (PropertySecret) secret;
-        TextView key = new TextView(ctx);
-        key.setText(pSecret.getId());
-        key.setEnabled(false);
-        this.addView(key);
-
-        TextView value = new TextView(ctx);
-        value.setText(pSecret.getValue());
-        this.addView(value);
+        } catch (Exception ex) {
+            Log.e(SecretViewFactory.class.getName(), ex.getMessage(), ex);
+        }
+        return null;
 
     }
-
 }

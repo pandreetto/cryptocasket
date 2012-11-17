@@ -72,9 +72,8 @@ public class PropertySecret
 
     public String toXML() {
         StringBuffer buff = new StringBuffer();
-        buff.append("<secret class=\"").append(this.getClass().getName()).append("\">\n");
         buff.append("<key>").append(key).append("</key>\n");
-        buff.append("<value>").append(value).append("</value>\n</secret>\n");
+        buff.append("<value>").append(value).append("</value>\n");
         return buff.toString();
     }
 }

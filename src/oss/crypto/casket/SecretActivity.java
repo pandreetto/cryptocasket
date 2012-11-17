@@ -16,14 +16,10 @@
 
 package oss.crypto.casket;
 
-import java.lang.reflect.Constructor;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 public class SecretActivity
     extends Activity {
@@ -51,7 +47,7 @@ public class SecretActivity
             try {
                 Secret secret = SecretManager.getManager(this, login, password, false).getSecret(secId);
 
-                this.setContentView(getSecretView(secret));
+                this.setContentView(SecretViewFactory.getSecretView(secret, this));
 
             } catch (Exception ex) {
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
@@ -69,21 +65,6 @@ public class SecretActivity
     public void onDestroy() {
         super.onDestroy();
         Log.d(getLocalClassName(), "Called onDestroy");
-    }
-
-    protected View getSecretView(Secret secret) {
-        try {
-
-            String sClassName = secret.getClass().getName() + "View";
-            Class<?> sClass = Class.forName(sClassName);
-            Constructor<?> cTor = sClass.getConstructor(Context.class, Secret.class);
-            return (View) cTor.newInstance(this, secret);
-
-        } catch (Exception ex) {
-            Log.e(getLocalClassName(), ex.getMessage(), ex);
-        }
-        return null;
-
     }
 
 }

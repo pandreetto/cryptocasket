@@ -17,27 +17,33 @@
 package oss.crypto.casket;
 
 import android.content.Context;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class PropertySecretView
-    extends LinearLayout {
-
-    public PropertySecretView(Context ctx, Secret secret) {
+public class GroupOfSecretView extends LinearLayout {
+    
+    public GroupOfSecretView(Context ctx, Secret secret) {
         super(ctx);
+        
+        this.setOrientation(VERTICAL);
+        
+        GroupOfSecret gSecret = (GroupOfSecret) secret;
+        
+        TextView idTxt = new TextView(ctx);
+        idTxt.setText(gSecret.getId());
+        idTxt.setEnabled(false);
+        this.addView(idTxt);
 
-        this.setOrientation(HORIZONTAL);
-
-        PropertySecret pSecret = (PropertySecret) secret;
-        TextView key = new TextView(ctx);
-        key.setText(pSecret.getId());
-        key.setEnabled(false);
-        this.addView(key);
-
-        TextView value = new TextView(ctx);
-        value.setText(pSecret.getValue());
-        this.addView(value);
-
+        
+        for(Secret secItem : gSecret) {
+            /*
+             * TODO missing chkbtn
+             */
+            View viewItem = SecretViewFactory.getSecretView(secItem, ctx);
+            this.addView(viewItem);
+        }
     }
-
+    
+    
 }

@@ -24,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -88,19 +90,66 @@ public class SecretList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.add(R.string.add_secret);
-        menu.add(R.string.rmv_secret);
+        menu.add(Menu.NONE, 1, Menu.NONE, R.string.add_secret);
+        menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_secret);
 
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        default:
-            Log.d(getLocalClassName(), "Selected item: " + item.getTitle());
-            return super.onOptionsItemSelected(item);
+
+        SecretManager manager = null;
+        try {
+            manager = SecretManager.getManager(this, login, password, false);
+        } catch (Exception ex) {
+            /*
+             * TODO handle exception
+             */
+            return false;
         }
+
+        boolean needRefresh = false;
+        switch (item.getItemId()) {
+        case 1:
+            /*
+             * TODO to be implemented
+             */
+            break;
+        case 2:
+            ListView lView = this.getListView();
+            for (int k = 0; k < lView.getChildCount(); k++) {
+                LinearLayout tmpl = (LinearLayout) lView.getChildAt(k);
+                CheckBox cBox = (CheckBox) tmpl.getChildAt(0);
+                TextView tView = (TextView) tmpl.getChildAt(1);
+                if (cBox.isChecked()) {
+                    String secId = tView.getText().toString();
+                    Log.d(this.getClass().getName(), "Removing " + secId);
+                    try {
+                        manager.removeSecret(secId);
+                        needRefresh = true;
+                    } catch (Exception ex) {
+                        /*
+                         * TODO handle exception
+                         */
+                    }
+                }
+            }
+            break;
+        }
+
+        if (needRefresh) {
+            try {
+                Secret[] secrets = manager.getSecrets();
+                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, R.id.secret_id, secrets));
+            } catch (Exception ex) {
+                /*
+                 * TODO handle exception
+                 */
+            }
+        }
+
+        return false;
     }
 
     public void selectSecret(View sView) {

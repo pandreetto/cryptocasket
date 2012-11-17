@@ -34,7 +34,9 @@ public class SecretWriter {
      */
     public void write(Secret secret) {
         String tmps = secret.toXML();
-        writer.println(tmps);
+        writer.print("<secret class=\"" + secret.getClass().getName() + "\">\n");
+        writer.print(tmps);
+        writer.print("</secret>\n");
     }
 
     public void close() {

@@ -121,6 +121,7 @@ public class SecretManager {
             writer = new SecretWriter(cOut);
 
             for (Secret secItem : sList) {
+                Log.d(SecretManager.class.getName(), secItem.toXML());
                 writer.write(secItem);
             }
 
@@ -153,12 +154,19 @@ public class SecretManager {
 
             try {
 
-                ArrayList<Secret> sList = new ArrayList<Secret>(20);
-                for (int k = 0; k < 20; k++) {
-                    PropertySecret tmps = new PropertySecret();
-                    tmps.setId("Secret[" + k + "]");
-                    tmps.setValue(login + "(" + k + ")");
-                    sList.add(tmps);
+                ArrayList<Secret> sList = new ArrayList<Secret>(5);
+                for (int k = 0; k < 5; k++) {
+                    GroupOfSecret tmpg = new GroupOfSecret();
+                    tmpg.setId("Secret[" + k + "]");
+
+                    for (int j = 0; j < 5; j++) {
+                        PropertySecret tmps = new PropertySecret();
+                        tmps.setId("Name");
+                        tmps.setValue(login + "(" + j + ")");
+                        tmpg.addSecret(tmps);
+                    }
+
+                    sList.add(tmpg);
                 }
 
                 writeSecrets(sList);
@@ -213,13 +221,13 @@ public class SecretManager {
         }
     }
 
-    public void removeSecret(Secret secret)
+    public void removeSecret(String secretId)
         throws IOException {
         ArrayList<Secret> resList = readSecrets();
         int idx = 0;
         boolean found = false;
         for (Secret secItem : resList) {
-            if (secret.getId().equals(secItem.getId())) {
+            if (secretId.equals(secItem.getId())) {
                 found = true;
                 break;
             } else {
@@ -232,6 +240,11 @@ public class SecretManager {
             writeSecrets(resList);
         }
 
+    }
+
+    public void removeSecret(Secret secret)
+        throws IOException {
+        removeSecret(secret.getId());
     }
 
     private static HashMap<String, SecretManager> managers = new HashMap<String, SecretManager>();
