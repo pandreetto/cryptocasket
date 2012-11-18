@@ -51,7 +51,8 @@ public class SecretList
         Intent intent = this.getIntent();
         login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
-        boolean newSecret = intent.getBooleanExtra(CasketConstants.ACT_TAG, false);
+        int actionMode = intent.getIntExtra(CasketConstants.ACT_TAG, CasketConstants.NO_ACTION);
+        boolean newSecret = actionMode == CasketConstants.CREATE_ACTION;
 
         if (login == null || password == null) {
 

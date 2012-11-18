@@ -26,4 +26,10 @@ public class CasketConstants {
 
     public final static String SECID_TAG = "oss.crypto.casket.SECRET_ID";
 
+    public final static int NO_ACTION = 0;
+
+    public final static int CREATE_ACTION = 1;
+
+    public final static int DESTROY_ACTION = 2;
+
 }

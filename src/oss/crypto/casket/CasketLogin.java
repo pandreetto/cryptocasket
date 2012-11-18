@@ -28,6 +28,8 @@ import android.widget.TextView;
 public class CasketLogin
     extends Activity {
 
+    private int currentActionMode = CasketConstants.NO_ACTION;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,21 +64,23 @@ public class CasketLogin
         Intent intent = new Intent(this, SecretList.class);
         intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
         intent.putExtra(CasketConstants.PWD_TAG, pwd);
-        intent.putExtra(CasketConstants.ACT_TAG, false);
+        intent.putExtra(CasketConstants.ACT_TAG, CasketConstants.NO_ACTION);
 
         startActivity(intent);
 
     }
 
-    public void confirmPwd(View loginView) {
+    public void confirmPwd(View btnView) {
         TextView confirmText = (TextView) findViewById(R.id.repwd_text);
         EditText repwdText = (EditText) findViewById(R.id.repwd_message);
         Button regBtn = (Button) findViewById(R.id.register_btn);
+        Button destBtn = (Button) findViewById(R.id.destroy_btn);
         Button logBtn = (Button) findViewById(R.id.login_btn);
         Button cancBtn = (Button) findViewById(R.id.canc_btn);
-        Button createBtn = (Button) findViewById(R.id.create_btn);
+        Button createBtn = (Button) findViewById(R.id.confirm_btn);
         Button discBtn = (Button) findViewById(R.id.discard_btn);
 
+        destBtn.setVisibility(Button.GONE);
         regBtn.setVisibility(Button.GONE);
         logBtn.setVisibility(Button.GONE);
         cancBtn.setVisibility(Button.GONE);
@@ -85,9 +89,15 @@ public class CasketLogin
         createBtn.setVisibility(Button.VISIBLE);
         discBtn.setVisibility(Button.VISIBLE);
 
+        Button clickedBtn = (Button) btnView;
+        if (clickedBtn.getId() == R.id.register_btn) {
+            currentActionMode = CasketConstants.CREATE_ACTION;
+        } else if (clickedBtn.getId() == R.id.destroy_btn) {
+            currentActionMode = CasketConstants.DESTROY_ACTION;
+        }
     }
 
-    public void register(View loginView) {
+    public void doAction(View btnView) {
         EditText loginText = (EditText) findViewById(R.id.login_message);
         String loginName = loginText.getText().toString();
 
@@ -98,13 +108,30 @@ public class CasketLogin
         String rePwd = rePwdText.getText().toString();
 
         if (pwd.equals(rePwd)) {
-            Intent intent = new Intent(this, SecretList.class);
-            intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
-            intent.putExtra(CasketConstants.PWD_TAG, pwd);
-            intent.putExtra(CasketConstants.ACT_TAG, true);
+            if (currentActionMode == CasketConstants.DESTROY_ACTION) {
 
-            startActivity(intent);
+                /*
+                 * TODO remove secret file
+                 */
+                Log.d(getPackageName(), "Removing secret file");
+                setContentView(R.layout.login);
+
+            } else {
+
+                Intent intent = new Intent(this, SecretList.class);
+                intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
+                intent.putExtra(CasketConstants.PWD_TAG, pwd);
+                intent.putExtra(CasketConstants.ACT_TAG, currentActionMode);
+
+                startActivity(intent);
+            }
+
         } else {
+
+            /*
+             * TODO missing error message
+             */
+
             this.finish();
         }
 
