@@ -113,9 +113,10 @@ public class SecretList
         boolean needRefresh = false;
         switch (item.getItemId()) {
         case 1:
-            /*
-             * TODO to be implemented
-             */
+            Intent intent = new Intent(this, SecretActivity.class);
+            intent.putExtra(CasketConstants.LOGIN_TAG, login);
+            intent.putExtra(CasketConstants.PWD_TAG, password);
+            startActivity(intent);
             break;
         case 2:
             ListView lView = this.getListView();

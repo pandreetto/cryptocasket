@@ -20,9 +20,18 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
 public class SecretActivity
     extends Activity {
+
+    private View viewBox = null;
+
+    private String login;
+
+    private String password;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -34,8 +43,8 @@ public class SecretActivity
         super.onStart();
 
         Intent intent = this.getIntent();
-        String login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
-        String password = intent.getStringExtra(CasketConstants.PWD_TAG);
+        login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
+        password = intent.getStringExtra(CasketConstants.PWD_TAG);
         String secId = intent.getStringExtra(CasketConstants.SECID_TAG);
 
         if (login == null || password == null) {
@@ -45,9 +54,18 @@ public class SecretActivity
         } else {
 
             try {
-                Secret secret = SecretManager.getManager(this, login, password, false).getSecret(secId);
 
-                this.setContentView(SecretViewFactory.getSecretView(secret, this));
+                if (secId == null) {
+
+                    viewBox = new GroupOfSecretView(this);
+
+                } else {
+                    SecretManager secMan = SecretManager.getManager(this, login, password, false);
+                    Secret currentSec = secMan.getSecret(secId);
+                    viewBox = SecretViewFactory.getSecretView(this, currentSec);
+                }
+
+                this.setContentView(viewBox);
 
             } catch (Exception ex) {
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
@@ -67,4 +85,39 @@ public class SecretActivity
         Log.d(getLocalClassName(), "Called onDestroy");
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        menu.add(Menu.NONE, 1, Menu.NONE, R.string.save_all);
+
+        if (viewBox instanceof GroupOfSecretView) {
+            menu.add(Menu.NONE, 2, Menu.NONE, R.string.add_prop);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case 1:
+
+            try {
+                Secret newSecret = SecretViewFactory.getSecret(viewBox);
+                SecretManager.getManager(this, login, password, false).putSecret(newSecret);
+            } catch (Exception ex) {
+                Log.e(getLocalClassName(), ex.getMessage(), ex);
+            }
+
+            return true;
+        case 2:
+
+            GroupOfSecretView gView = (GroupOfSecretView) viewBox;
+            PropertySecretView pView = new PropertySecretView(this);
+            gView.addView(pView);
+            return true;
+
+        }
+        return false;
+    }
 }

@@ -17,11 +17,31 @@
 package oss.crypto.casket;
 
 import android.content.Context;
+import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class PropertySecretView
-    extends LinearLayout {
+    extends LinearLayout
+    implements SecretViewFactory.SecretViewHelper {
+
+    public PropertySecretView(Context ctx) {
+        super(ctx);
+
+        this.setOrientation(HORIZONTAL);
+
+        ViewGroup.LayoutParams lParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        EditText keyField = new EditText(ctx);
+        keyField.setLayoutParams(lParams);
+        this.addView(keyField);
+
+        EditText valueField = new EditText(ctx);
+        valueField.setLayoutParams(lParams);
+        this.addView(valueField);
+
+    }
 
     public PropertySecretView(Context ctx, Secret secret) {
         super(ctx);
@@ -38,6 +58,15 @@ public class PropertySecretView
         value.setText(pSecret.getValue());
         this.addView(value);
 
+    }
+
+    public Secret buildSecret() {
+        PropertySecret pSecret = new PropertySecret();
+        TextView key = (TextView) this.getChildAt(0);
+        TextView value = (TextView) this.getChildAt(1);
+        pSecret.setId(key.getText().toString());
+        pSecret.setValue(value.getText().toString());
+        return pSecret;
     }
 
 }

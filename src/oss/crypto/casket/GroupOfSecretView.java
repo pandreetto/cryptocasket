@@ -18,32 +18,57 @@ package oss.crypto.casket;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class GroupOfSecretView extends LinearLayout {
-    
+public class GroupOfSecretView
+    extends LinearLayout
+    implements SecretViewFactory.SecretViewHelper {
+
+    private TextView secIdText;
+
+    public GroupOfSecretView(Context ctx) {
+        super(ctx);
+
+        this.setOrientation(VERTICAL);
+
+        secIdText = new EditText(ctx);
+        secIdText.setHint(R.string.sec_id_hint);
+        this.addView(secIdText);
+
+    }
+
     public GroupOfSecretView(Context ctx, Secret secret) {
         super(ctx);
-        
-        this.setOrientation(VERTICAL);
-        
-        GroupOfSecret gSecret = (GroupOfSecret) secret;
-        
-        TextView idTxt = new TextView(ctx);
-        idTxt.setText(gSecret.getId());
-        idTxt.setEnabled(false);
-        this.addView(idTxt);
 
-        
-        for(Secret secItem : gSecret) {
-            /*
-             * TODO missing chkbtn
-             */
-            View viewItem = SecretViewFactory.getSecretView(secItem, ctx);
+        this.setOrientation(VERTICAL);
+
+        GroupOfSecret gSecret = (GroupOfSecret) secret;
+
+        secIdText = new TextView(ctx);
+        secIdText.setText(gSecret.getId());
+        secIdText.setEnabled(false);
+        this.addView(secIdText);
+
+        for (Secret secItem : gSecret) {
+            View viewItem = SecretViewFactory.getSecretView(ctx, secItem);
             this.addView(viewItem);
         }
     }
-    
-    
+
+    public Secret buildSecret() {
+        GroupOfSecret gSecret = new GroupOfSecret();
+        gSecret.setId(secIdText.getText().toString());
+
+        for (int k = 0; k < this.getChildCount(); k++) {
+            View vChild = this.getChildAt(k);
+            Secret tmps = SecretViewFactory.getSecret(vChild);
+            if (tmps != null) {
+                gSecret.addSecret(tmps);
+            }
+        }
+        return gSecret;
+    }
+
 }

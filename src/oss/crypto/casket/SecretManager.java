@@ -204,20 +204,22 @@ public class SecretManager {
         throw new IOException("Cannot find " + secretId);
     }
 
-    public void addSecret(Secret secret)
+    public void putSecret(Secret secret)
         throws IOException {
-        boolean found = false;
+        int idx = 0;
         ArrayList<Secret> resList = readSecrets();
         for (Secret secItem : resList) {
             if (secret.getId().equals(secItem.getId())) {
-                found = true;
                 break;
             }
+            idx++;
         }
 
-        if (!found) {
+        if (idx == resList.size()) {
             resList.add(secret);
             writeSecrets(resList);
+        } else {
+            resList.add(idx, secret);
         }
     }
 
