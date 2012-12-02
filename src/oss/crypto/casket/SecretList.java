@@ -16,25 +16,26 @@
 
 package oss.crypto.casket;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 public class SecretList
-    extends ListActivity {
+    extends Activity
+    implements View.OnClickListener, View.OnLongClickListener {
 
     private String login;
 
     private String password;
+
+    private LinearLayout listView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,13 +63,14 @@ public class SecretList
 
             try {
 
-                ListView lView = this.getListView();
                 Secret[] secrets = SecretManager.getManager(this, login, password, newSecret).getSecrets();
 
-                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, R.id.secret_id, secrets));
-                lView.setTextFilterEnabled(true);
+                prepareList(secrets);
 
             } catch (Exception ex) {
+                /*
+                 * TODO handle exception
+                 */
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
             }
         }
@@ -119,16 +121,11 @@ public class SecretList
             startActivity(intent);
             break;
         case 2:
-            ListView lView = this.getListView();
-            for (int k = 0; k < lView.getChildCount(); k++) {
-                LinearLayout tmpl = (LinearLayout) lView.getChildAt(k);
-                CheckBox cBox = (CheckBox) tmpl.getChildAt(0);
-                TextView tView = (TextView) tmpl.getChildAt(1);
-                if (cBox.isChecked()) {
-                    String secId = tView.getText().toString();
-                    Log.d(this.getClass().getName(), "Removing " + secId);
+            for (int k = 0; k < listView.getChildCount(); k++) {
+                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
+                if (secView.isSelected()) {
                     try {
-                        manager.removeSecret(secId);
+                        manager.removeSecret(secView.getSecretId());
                         needRefresh = true;
                     } catch (Exception ex) {
                         /*
@@ -142,8 +139,9 @@ public class SecretList
 
         if (needRefresh) {
             try {
-                Secret[] secrets = manager.getSecrets();
-                setListAdapter(new ArrayAdapter<Secret>(this, R.layout.secretitem, R.id.secret_id, secrets));
+
+                prepareList(manager.getSecrets());
+
             } catch (Exception ex) {
                 /*
                  * TODO handle exception
@@ -154,7 +152,7 @@ public class SecretList
         return false;
     }
 
-    public void selectSecret(View sView) {
+    public void onClick(View sView) {
         TextView tView = (TextView) sView;
         String sId = tView.getText().toString();
         Intent intent = new Intent(this, SecretActivity.class);
@@ -162,6 +160,64 @@ public class SecretList
         intent.putExtra(CasketConstants.PWD_TAG, password);
         intent.putExtra(CasketConstants.SECID_TAG, sId);
         startActivity(intent);
+    }
+
+    public boolean onLongClick(View sView) {
+        TextView tView = (TextView) sView;
+        String sId = tView.getText().toString();
+        Log.d(getLocalClassName(), "Long click for " + sId);
+        return true;
+    }
+
+    private void prepareList(Secret[] secrets) {
+
+        listView = new LinearLayout(this);
+        listView.setOrientation(LinearLayout.VERTICAL);
+
+        for (Secret secItem : secrets) {
+            SecretItemView secView = new SecretItemView(this, secItem);
+            listView.addView(secView);
+        }
+
+        this.setContentView(listView);
+
+    }
+
+    public class SecretItemView
+        extends LinearLayout {
+
+        public SecretItemView(SecretList ctx, Secret secret) {
+            super(ctx);
+
+            this.setOrientation(HORIZONTAL);
+
+            ViewGroup.LayoutParams lParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            this.setLayoutParams(lParams);
+
+            TextView tView = new TextView(ctx);
+            ViewGroup.LayoutParams tParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            tView.setLayoutParams(tParams);
+
+            tView.setClickable(true);
+            tView.setLongClickable(true);
+            tView.setOnClickListener(ctx);
+            tView.setOnLongClickListener(ctx);
+
+            tView.setText(secret.getId());
+
+            this.addView(tView);
+        }
+
+        public String getSecretId() {
+            TextView tmpv = (TextView) this.getChildAt(0);
+            return tmpv.getText().toString();
+        }
+
+        /*
+         * TODO missing implementation of isSelected
+         */
     }
 
 }
