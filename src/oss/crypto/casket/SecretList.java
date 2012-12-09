@@ -25,17 +25,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 public class SecretList
     extends Activity
-    implements View.OnClickListener, View.OnLongClickListener {
+    implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
 
     private String login;
 
     private String password;
 
     private LinearLayout listView;
+
+    private String currentSelItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,10 +71,8 @@ public class SecretList
                 prepareList(secrets);
 
             } catch (Exception ex) {
-                /*
-                 * TODO handle exception
-                 */
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
+                showError(R.string.list_err1 + ": " + ex.getMessage(), true);
             }
         }
 
@@ -106,9 +107,7 @@ public class SecretList
         try {
             manager = SecretManager.getManager(this, login, password, false);
         } catch (Exception ex) {
-            /*
-             * TODO handle exception
-             */
+            showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
             return false;
         }
 
@@ -128,9 +127,7 @@ public class SecretList
                         manager.removeSecret(secView.getSecretId());
                         needRefresh = true;
                     } catch (Exception ex) {
-                        /*
-                         * TODO handle exception
-                         */
+                        showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
                     }
                 }
             }
@@ -143,9 +140,7 @@ public class SecretList
                 prepareList(manager.getSecrets());
 
             } catch (Exception ex) {
-                /*
-                 * TODO handle exception
-                 */
+                showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
             }
         }
 
@@ -162,11 +157,44 @@ public class SecretList
         startActivity(intent);
     }
 
-    public boolean onLongClick(View sView) {
-        TextView tView = (TextView) sView;
-        String sId = tView.getText().toString();
-        Log.d(getLocalClassName(), "Long click for " + sId);
+    public boolean onLongClick(View tView) {
+
+        currentSelItem = ((TextView) tView).getText().toString();
+
+        PopupMenu popMenu = new PopupMenu(this, tView);
+        popMenu.setOnMenuItemClickListener(this);
+        Menu menu = popMenu.getMenu();
+        menu.add(Menu.NONE, 1, Menu.NONE, R.string.sel_item);
+        menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_item);
+        menu.add(Menu.NONE, 3, Menu.NONE, R.string.canc_pop);
+        popMenu.show();
+
         return true;
+    }
+
+    public boolean onMenuItemClick(MenuItem item) {
+        switch (item.getItemId()) {
+        case 1:
+            /*
+             * TODO to be implemented
+             */
+            currentSelItem = null;
+            return true;
+        case 2:
+            try {
+                SecretManager manager = SecretManager.getManager(this, login, password, false);
+                manager.removeSecret(currentSelItem);
+                prepareList(manager.getSecrets());
+            } catch (Exception ex) {
+                showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
+            }
+            currentSelItem = null;
+            return true;
+        case 3:
+            currentSelItem = null;
+            return true;
+        }
+        return false;
     }
 
     private void prepareList(Secret[] secrets) {
@@ -181,6 +209,12 @@ public class SecretList
 
         this.setContentView(listView);
 
+    }
+
+    private void showError(String errMsg, boolean goon) {
+        /*
+         * TODO show dialog for error and exit if not goon
+         */
     }
 
     public class SecretItemView
