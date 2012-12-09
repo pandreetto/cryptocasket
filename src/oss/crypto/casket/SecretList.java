@@ -18,6 +18,7 @@ package oss.crypto.casket;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -96,6 +97,7 @@ public class SecretList
 
         menu.add(Menu.NONE, 1, Menu.NONE, R.string.add_secret);
         menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_secret);
+        menu.add(Menu.NONE, 3, Menu.NONE, R.string.desel_all);
 
         return true;
     }
@@ -130,6 +132,12 @@ public class SecretList
                         showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
                     }
                 }
+            }
+            break;
+        case 3:
+            for (int k = 0; k < listView.getChildCount(); k++) {
+                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
+                secView.setSelected(false);
             }
             break;
         }
@@ -175,9 +183,12 @@ public class SecretList
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
         case 1:
-            /*
-             * TODO to be implemented
-             */
+            for (int k = 0; k < listView.getChildCount(); k++) {
+                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
+                if(secView.getSecretId() == currentSelItem) {
+                    secView.setSelected(true);
+                }
+            }
             currentSelItem = null;
             return true;
         case 2:
@@ -219,7 +230,7 @@ public class SecretList
 
     public class SecretItemView
         extends LinearLayout {
-
+        
         public SecretItemView(SecretList ctx, Secret secret) {
             super(ctx);
 
@@ -238,6 +249,8 @@ public class SecretList
             tView.setLongClickable(true);
             tView.setOnClickListener(ctx);
             tView.setOnLongClickListener(ctx);
+            ColorStateList cList = this.getResources().getColorStateList(R.color.secretviewitem);
+            tView.setTextColor(cList);
 
             tView.setText(secret.getId());
 
@@ -249,9 +262,15 @@ public class SecretList
             return tmpv.getText().toString();
         }
 
-        /*
-         * TODO missing implementation of isSelected
-         */
+        public boolean isSelected() {
+            TextView tmpv = (TextView) this.getChildAt(0);
+            return tmpv.isSelected();
+        }
+        
+        public void setSelected(boolean sel) {
+            TextView tmpv = (TextView) this.getChildAt(0);
+            tmpv.setSelected(sel);
+        }
     }
 
 }
