@@ -23,7 +23,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -249,17 +248,15 @@ public class SecretManager {
         removeSecret(secret.getId());
     }
 
-    private static HashMap<String, SecretManager> managers = new HashMap<String, SecretManager>();
+    private static SecretManager theManager = null;
 
     public static SecretManager getManager(Context ctx, String login, String pwd, boolean create)
         throws IOException {
 
-        SecretManager result = managers.get(login);
-
-        if (result == null) {
-            result = new SecretManager(ctx, login, pwd, create);
-            managers.put(login, result);
+        if (theManager == null || (theManager.login != login && theManager.pwd != pwd)) {
+            theManager = new SecretManager(ctx, login, pwd, create);
         }
-        return result;
+
+        return theManager;
     }
 }
