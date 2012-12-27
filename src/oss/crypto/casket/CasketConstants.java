@@ -22,8 +22,6 @@ public class CasketConstants {
 
     public final static String PWD_TAG = "oss.crypto.casket.PWD";
 
-    public final static String ACT_TAG = "oss.crypto.casket.REGISTER";
-
     public final static String SECID_TAG = "oss.crypto.casket.SECRET_ID";
 
     public final static int NO_ACTION = 0;

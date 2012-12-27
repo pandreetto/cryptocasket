@@ -17,11 +17,13 @@
 package oss.crypto.casket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.PasswordTransformationMethod;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -29,7 +31,7 @@ import android.widget.TextView;
 
 public class CasketLogin
     extends Activity
-    implements View.OnClickListener {
+    implements View.OnClickListener, DialogInterface.OnClickListener {
 
     private final static int LOG_ID = 1356514713;
 
@@ -74,10 +76,12 @@ public class CasketLogin
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         currentActionMode = CasketConstants.NO_ACTION;
-        
+
         PasswordTransformationMethod tMethod = new PasswordTransformationMethod();
+        LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT, (float) 0.5);
 
         loginView = new LinearLayout(this);
         loginView.setOrientation(LinearLayout.VERTICAL);
@@ -101,11 +105,13 @@ public class CasketLogin
         logBtn = new Button(this);
         logBtn.setId(LOG_ID);
         logBtn.setText(R.string.login_btn);
+        logBtn.setLayoutParams(lParams);
         logBtn.setOnClickListener(this);
         row1.addView(logBtn);
         cancBtn = new Button(this);
         cancBtn.setId(CANC_ID);
         cancBtn.setText(R.string.cancel_btn);
+        cancBtn.setLayoutParams(lParams);
         cancBtn.setOnClickListener(this);
         row1.addView(cancBtn);
         loginView.addView(row1);
@@ -114,11 +120,13 @@ public class CasketLogin
         destBtn = new Button(this);
         destBtn.setId(DEL_ID);
         destBtn.setText(R.string.destroy_btn);
+        destBtn.setLayoutParams(lParams);
         destBtn.setOnClickListener(this);
         row2.addView(destBtn);
         regBtn = new Button(this);
         regBtn.setId(REG_ID);
         regBtn.setText(R.string.register_btn);
+        regBtn.setLayoutParams(lParams);
         regBtn.setOnClickListener(this);
         row2.addView(regBtn);
         loginView.addView(row2);
@@ -135,11 +143,13 @@ public class CasketLogin
         goBtn = new Button(this);
         goBtn.setId(GO_ID);
         goBtn.setText(R.string.confirm_btn);
+        goBtn.setLayoutParams(lParams);
         goBtn.setOnClickListener(this);
         row3.addView(goBtn);
         discBtn = new Button(this);
         discBtn.setId(DISC_ID);
         discBtn.setText(R.string.discard_btn);
+        discBtn.setLayoutParams(lParams);
         discBtn.setOnClickListener(this);
         row3.addView(discBtn);
         loginView.addView(row3);
@@ -151,13 +161,7 @@ public class CasketLogin
     public void onStart() {
         super.onStart();
 
-        currentActionMode = CasketConstants.NO_ACTION;
-        
-        hideConfirmPwd();
-        
-        loginValue.setText("");
-        pwdValue.setText("");
-        rePwdValue.setText("");
+        resetView();
     }
 
     @Override
@@ -172,83 +176,98 @@ public class CasketLogin
 
     public void onClick(View sView) {
         int btnId = ((Button) sView).getId();
-                
+
         if (btnId == LOG_ID) {
-            
+
             String loginName = loginValue.getText().toString();
             String pwd = pwdValue.getText().toString();
-            
-            try {
-                
-                SecretManager.getManager(this, loginName, pwd, false);
-                
-            } catch (Exception ex) {
-                /*
-                 * TODO missing error handling
-                 */
-            }
 
+            try {
+
+                SecretManager manager = SecretManager.getManager(this, loginName, pwd);
+                manager.getSecrets();
+
+            } catch (Exception ex) {
+
+                showError(R.string.casket_err);
+                return;
+            }
 
             Intent intent = new Intent(this, SecretList.class);
             intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
             intent.putExtra(CasketConstants.PWD_TAG, pwd);
-            intent.putExtra(CasketConstants.ACT_TAG, CasketConstants.NO_ACTION);
 
             startActivity(intent);
-            
-        } else if (btnId == CANC_ID){
-            
+
+        } else if (btnId == CANC_ID) {
+
             this.finish();
-        
-        } else if (btnId == REG_ID){         
-        
+
+        } else if (btnId == REG_ID) {
+
             showConfirmPwd();
             currentActionMode = CasketConstants.CREATE_ACTION;
-        
-        } else if (btnId == DEL_ID){           
-        
+
+        } else if (btnId == DEL_ID) {
+
             showConfirmPwd();
             currentActionMode = CasketConstants.DESTROY_ACTION;
-        
-        }  else if (btnId == GO_ID){
+
+        } else if (btnId == GO_ID) {
 
             String loginName = loginValue.getText().toString();
             String pwd = pwdValue.getText().toString();
             String rePwd = rePwdValue.getText().toString();
 
-            if (pwd.equals(rePwd)) {
+            if (!pwd.equals(rePwd)) {
+
+                showError(R.string.pwd_mismatch);
+                return;
+            }
+
+            try {
+
+                SecretManager manager = SecretManager.getManager(this, loginName, pwd);
+
                 if (currentActionMode == CasketConstants.DESTROY_ACTION) {
 
-                    /*
-                     * TODO remove secret file
-                     */
-                    Log.d(getPackageName(), "Removing secret file");
-                    setContentView(R.layout.login);
+                    manager.destroy();
+                    resetView();
 
                 } else {
+
+                    manager.create();
 
                     Intent intent = new Intent(this, SecretList.class);
                     intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
                     intent.putExtra(CasketConstants.PWD_TAG, pwd);
-                    intent.putExtra(CasketConstants.ACT_TAG, currentActionMode);
 
                     startActivity(intent);
                 }
 
-            } else {
-
-                /*
-                 * TODO missing error message
-                 */
-
-                this.finish();
+            } catch (Exception ex) {
+                showError(R.string.casket_operr);
             }
-            
-        } else if (btnId == DISC_ID){
-            
+
+        } else if (btnId == DISC_ID) {
+
             this.finish();
-        
+
         }
+    }
+
+    public void onClick(DialogInterface dialog, int id) {
+        resetView();
+    }
+
+    private void resetView() {
+        currentActionMode = CasketConstants.NO_ACTION;
+
+        hideConfirmPwd();
+
+        loginValue.setText("");
+        pwdValue.setText("");
+        rePwdValue.setText("");
     }
 
     private void hideConfirmPwd() {
@@ -274,6 +293,19 @@ public class CasketLogin
         rePwdValue.setVisibility(EditText.VISIBLE);
         goBtn.setVisibility(Button.VISIBLE);
         discBtn.setVisibility(Button.VISIBLE);
+
+    }
+
+    private void showError(int msgId) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.err_dmsg);
+        builder.setMessage(msgId);
+
+        builder.setPositiveButton(R.string.ok_dbtn, this);
+
+        AlertDialog errDialog = builder.create();
+        errDialog.show();
 
     }
 

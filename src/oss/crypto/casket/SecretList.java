@@ -17,6 +17,8 @@
 package oss.crypto.casket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -31,7 +33,8 @@ import android.widget.TextView;
 
 public class SecretList
     extends Activity
-    implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {
+    implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener,
+    DialogInterface.OnClickListener {
 
     private String login;
 
@@ -56,8 +59,6 @@ public class SecretList
         Intent intent = this.getIntent();
         login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
-        int actionMode = intent.getIntExtra(CasketConstants.ACT_TAG, CasketConstants.NO_ACTION);
-        boolean newSecret = actionMode == CasketConstants.CREATE_ACTION;
 
         if (login == null || password == null) {
 
@@ -67,13 +68,13 @@ public class SecretList
 
             try {
 
-                Secret[] secrets = SecretManager.getManager(this, login, password, newSecret).getSecrets();
+                Secret[] secrets = SecretManager.getManager(this, login, password).getSecrets();
 
                 prepareList(secrets);
 
             } catch (Exception ex) {
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
-                showError(R.string.list_err1 + ": " + ex.getMessage(), true);
+                showError(R.string.list_err1);
             }
         }
 
@@ -107,9 +108,9 @@ public class SecretList
 
         SecretManager manager = null;
         try {
-            manager = SecretManager.getManager(this, login, password, false);
+            manager = SecretManager.getManager(this, login, password);
         } catch (Exception ex) {
-            showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
+            showError(R.string.manager_err1);
             return false;
         }
 
@@ -129,7 +130,7 @@ public class SecretList
                         manager.removeSecret(secView.getSecretId());
                         needRefresh = true;
                     } catch (Exception ex) {
-                        showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
+                        showError(R.string.manager_err1);
                     }
                 }
             }
@@ -148,7 +149,7 @@ public class SecretList
                 prepareList(manager.getSecrets());
 
             } catch (Exception ex) {
-                showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
+                showError(R.string.manager_err1);
             }
         }
 
@@ -185,7 +186,7 @@ public class SecretList
         case 1:
             for (int k = 0; k < listView.getChildCount(); k++) {
                 SecretItemView secView = (SecretItemView) listView.getChildAt(k);
-                if(secView.getSecretId() == currentSelItem) {
+                if (secView.getSecretId() == currentSelItem) {
                     secView.setSelected(true);
                 }
             }
@@ -193,11 +194,11 @@ public class SecretList
             return true;
         case 2:
             try {
-                SecretManager manager = SecretManager.getManager(this, login, password, false);
+                SecretManager manager = SecretManager.getManager(this, login, password);
                 manager.removeSecret(currentSelItem);
                 prepareList(manager.getSecrets());
             } catch (Exception ex) {
-                showError(R.string.manager_err1 + ": " + ex.getMessage(), false);
+                showError(R.string.manager_err1);
             }
             currentSelItem = null;
             return true;
@@ -206,6 +207,10 @@ public class SecretList
             return true;
         }
         return false;
+    }
+
+    public void onClick(DialogInterface dialog, int id) {
+
     }
 
     private void prepareList(Secret[] secrets) {
@@ -222,15 +227,22 @@ public class SecretList
 
     }
 
-    private void showError(String errMsg, boolean goon) {
-        /*
-         * TODO show dialog for error and exit if not goon
-         */
+    private void showError(int msgId) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.err_dmsg);
+        builder.setMessage(msgId);
+
+        builder.setPositiveButton(R.string.ok_dbtn, this);
+
+        AlertDialog errDialog = builder.create();
+        errDialog.show();
+
     }
 
     public class SecretItemView
         extends LinearLayout {
-        
+
         public SecretItemView(SecretList ctx, Secret secret) {
             super(ctx);
 
@@ -266,7 +278,7 @@ public class SecretList
             TextView tmpv = (TextView) this.getChildAt(0);
             return tmpv.isSelected();
         }
-        
+
         public void setSelected(boolean sel) {
             TextView tmpv = (TextView) this.getChildAt(0);
             tmpv.setSelected(sel);

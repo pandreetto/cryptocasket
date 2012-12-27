@@ -134,7 +134,7 @@ public class SecretManager {
 
     }
 
-    protected SecretManager(Context ctx, String login, String pwd, boolean create) throws IOException {
+    protected SecretManager(Context ctx, String login, String pwd) throws IOException {
 
         this.context = ctx;
         this.login = login;
@@ -145,40 +145,26 @@ public class SecretManager {
 
         Log.d(SecretManager.class.getName(), "Cryptofile: " + cryptoFile.getAbsolutePath());
 
-        if (create) {
+    }
 
-            if (cryptoFile.exists()) {
-                // throw new IOException("Cryptofile already exists");
-            }
+    public void create()
+        throws IOException {
+        File workDir = context.getFilesDir();
+        File cryptoFile = new File(workDir, login + ".crypto");
 
-            try {
-
-                ArrayList<Secret> sList = new ArrayList<Secret>(5);
-                for (int k = 0; k < 5; k++) {
-                    GroupOfSecret tmpg = new GroupOfSecret();
-                    tmpg.setId("Secret[" + k + "]");
-
-                    for (int j = 0; j < 5; j++) {
-                        PropertySecret tmps = new PropertySecret();
-                        tmps.setId("Name");
-                        tmps.setValue(login + "(" + j + ")");
-                        tmpg.addSecret(tmps);
-                    }
-
-                    sList.add(tmpg);
-                }
-
-                writeSecrets(sList);
-
-            } catch (Exception ex) {
-                Log.e(SecretManager.class.getName(), ex.getMessage(), ex);
-                throw new IOException(ex.getMessage());
-            }
-
-        } else if (!cryptoFile.exists()) {
-            throw new IOException("Missing cryptofile");
+        if (cryptoFile.exists()) {
+            throw new IOException("Cryptofile already exists");
         }
 
+        ArrayList<Secret> sList = new ArrayList<Secret>(0);
+        writeSecrets(sList);
+    }
+
+    public void destroy()
+        throws IOException {
+        /*
+         * TODO to be implemented
+         */
     }
 
     public Secret[] getSecrets()
@@ -250,11 +236,11 @@ public class SecretManager {
 
     private static SecretManager theManager = null;
 
-    public static SecretManager getManager(Context ctx, String login, String pwd, boolean create)
+    public static SecretManager getManager(Context ctx, String login, String pwd)
         throws IOException {
 
         if (theManager == null || (theManager.login != login && theManager.pwd != pwd)) {
-            theManager = new SecretManager(ctx, login, pwd, create);
+            theManager = new SecretManager(ctx, login, pwd);
         }
 
         return theManager;

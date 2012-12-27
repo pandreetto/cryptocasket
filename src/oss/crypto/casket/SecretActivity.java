@@ -60,7 +60,7 @@ public class SecretActivity
                     viewBox = new GroupOfSecretView(this);
 
                 } else {
-                    SecretManager secMan = SecretManager.getManager(this, login, password, false);
+                    SecretManager secMan = SecretManager.getManager(this, login, password);
                     Secret currentSec = secMan.getSecret(secId);
                     viewBox = SecretViewFactory.getSecretView(this, currentSec);
                 }
@@ -104,7 +104,7 @@ public class SecretActivity
 
             try {
                 Secret newSecret = SecretViewFactory.getSecret(viewBox);
-                SecretManager.getManager(this, login, password, false).putSecret(newSecret);
+                SecretManager.getManager(this, login, password).putSecret(newSecret);
             } catch (Exception ex) {
                 Log.e(getLocalClassName(), ex.getMessage(), ex);
             }
