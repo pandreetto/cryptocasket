@@ -202,10 +202,11 @@ public class SecretManager {
 
         if (idx == resList.size()) {
             resList.add(secret);
-            writeSecrets(resList);
         } else {
-            resList.add(idx, secret);
+            resList.set(idx, secret);
         }
+        writeSecrets(resList);
+
     }
 
     public void removeSecret(String secretId)

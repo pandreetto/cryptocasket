@@ -17,7 +17,6 @@
 package oss.crypto.casket;
 
 import android.content.Context;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -26,19 +25,25 @@ public class PropertySecretView
     extends LinearLayout
     implements SecretViewFactory.SecretViewHelper {
 
+    private final static LinearLayout.LayoutParams col1Params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, (float) 0.7);
+
+    private final static LinearLayout.LayoutParams col2Params = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, (float) 0.3);
+
     public PropertySecretView(Context ctx) {
         super(ctx);
 
         this.setOrientation(HORIZONTAL);
 
-        ViewGroup.LayoutParams lParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
         EditText keyField = new EditText(ctx);
-        keyField.setLayoutParams(lParams);
+        keyField.setHint(R.string.key_hint);
+        keyField.setLayoutParams(col1Params);
         this.addView(keyField);
 
         EditText valueField = new EditText(ctx);
-        valueField.setLayoutParams(lParams);
+        valueField.setHint(R.string.value_hint);
+        valueField.setLayoutParams(col2Params);
         this.addView(valueField);
 
     }
@@ -49,14 +54,17 @@ public class PropertySecretView
         this.setOrientation(HORIZONTAL);
 
         PropertySecret pSecret = (PropertySecret) secret;
-        TextView key = new TextView(ctx);
-        key.setText(pSecret.getId());
-        key.setEnabled(false);
-        this.addView(key);
+        TextView keyField = new TextView(ctx);
+        keyField.setText(pSecret.getId());
+        keyField.setLayoutParams(col1Params);
+        keyField.setEnabled(false);
+        this.addView(keyField);
 
-        TextView value = new TextView(ctx);
-        value.setText(pSecret.getValue());
-        this.addView(value);
+        EditText valueField = new EditText(ctx);
+        valueField.setText(pSecret.getValue());
+        valueField.setLayoutParams(col2Params);
+        valueField.setEnabled(false);
+        this.addView(valueField);
 
     }
 

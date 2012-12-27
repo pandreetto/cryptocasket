@@ -17,15 +17,17 @@
 package oss.crypto.casket;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 public class SecretActivity
-    extends Activity {
+    extends Activity
+    implements DialogInterface.OnClickListener {
 
     private View viewBox = null;
 
@@ -49,7 +51,7 @@ public class SecretActivity
 
         if (login == null || password == null) {
 
-            Log.d(getLocalClassName(), "No login or pwd");
+            showError(R.string.nologorpwd);
 
         } else {
 
@@ -68,7 +70,9 @@ public class SecretActivity
                 this.setContentView(viewBox);
 
             } catch (Exception ex) {
-                Log.e(getLocalClassName(), ex.getMessage(), ex);
+
+                showError(R.string.casket_operr);
+
             }
         }
     }
@@ -76,13 +80,11 @@ public class SecretActivity
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(getLocalClassName(), "Called onStop");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(getLocalClassName(), "Called onDestroy");
     }
 
     @Override
@@ -106,7 +108,7 @@ public class SecretActivity
                 Secret newSecret = SecretViewFactory.getSecret(viewBox);
                 SecretManager.getManager(this, login, password).putSecret(newSecret);
             } catch (Exception ex) {
-                Log.e(getLocalClassName(), ex.getMessage(), ex);
+                showError(R.string.casket_operr);
             }
 
             return true;
@@ -119,5 +121,22 @@ public class SecretActivity
 
         }
         return false;
+    }
+
+    public void onClick(DialogInterface dialog, int id) {
+
+    }
+
+    private void showError(int msgId) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.err_dmsg);
+        builder.setMessage(msgId);
+
+        builder.setPositiveButton(R.string.ok_dbtn, this);
+
+        AlertDialog errDialog = builder.create();
+        errDialog.show();
+
     }
 }

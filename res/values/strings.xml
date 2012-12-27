@@ -22,10 +22,14 @@
     <string name="ok_dbtn">OK</string>
     <string name="err_dmsg">Error</string>
     
+    <string name="key_hint">Name</string>
+    <string name="value_hint">Value</string>
+    
     <string name="list_err1">Cannot display list</string>
     <string name="pwd_mismatch">Password mismatch</string>
     <string name="casket_err">Cannot open casket</string>
     <string name="casket_operr">Cannot perform operation</string>
+    <string name="nologorpwd">Missing login or password</string>
     
     <string name="manager_err1">Error querying secret manager</string>
 </resources>
