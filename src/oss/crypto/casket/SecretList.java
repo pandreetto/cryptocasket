@@ -174,8 +174,7 @@ public class SecretList
         popMenu.setOnMenuItemClickListener(this);
         Menu menu = popMenu.getMenu();
         menu.add(Menu.NONE, 1, Menu.NONE, R.string.sel_item);
-        menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_item);
-        menu.add(Menu.NONE, 3, Menu.NONE, R.string.canc_pop);
+        menu.add(Menu.NONE, 2, Menu.NONE, R.string.canc_pop);
         popMenu.show();
 
         return true;
@@ -187,22 +186,12 @@ public class SecretList
             for (int k = 0; k < listView.getChildCount(); k++) {
                 SecretItemView secView = (SecretItemView) listView.getChildAt(k);
                 if (secView.getSecretId() == currentSelItem) {
-                    secView.setSelected(true);
+                    secView.setSelected(!secView.isSelected());
                 }
             }
             currentSelItem = null;
             return true;
         case 2:
-            try {
-                SecretManager manager = SecretManager.getManager(this, login, password);
-                manager.removeSecret(currentSelItem);
-                prepareList(manager.getSecrets());
-            } catch (Exception ex) {
-                showError(R.string.manager_err1);
-            }
-            currentSelItem = null;
-            return true;
-        case 3:
             currentSelItem = null;
             return true;
         }
@@ -263,6 +252,7 @@ public class SecretList
             tView.setOnLongClickListener(ctx);
             ColorStateList cList = this.getResources().getColorStateList(R.color.secretviewitem);
             tView.setTextColor(cList);
+            tView.setPadding(10, 10, 10, 10);
 
             tView.setText(secret.getId());
 

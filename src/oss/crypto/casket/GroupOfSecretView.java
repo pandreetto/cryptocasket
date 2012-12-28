@@ -17,6 +17,7 @@
 package oss.crypto.casket;
 
 import android.content.Context;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -24,7 +25,7 @@ import android.widget.TextView;
 
 public class GroupOfSecretView
     extends LinearLayout
-    implements SecretViewFactory.SecretViewHelper {
+    implements SecretView {
 
     private TextView secIdText;
 
@@ -49,6 +50,8 @@ public class GroupOfSecretView
         secIdText = new TextView(ctx);
         secIdText.setText(gSecret.getId());
         secIdText.setEnabled(false);
+        secIdText.setGravity(Gravity.CENTER);
+        secIdText.setPadding(5, 5, 5, 5);
         this.addView(secIdText);
 
         for (Secret secItem : gSecret) {

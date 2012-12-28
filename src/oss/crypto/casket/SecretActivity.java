@@ -29,7 +29,7 @@ public class SecretActivity
     extends Activity
     implements DialogInterface.OnClickListener {
 
-    private View viewBox = null;
+    private GroupOfSecretView viewBox = null;
 
     private String login;
 
@@ -64,7 +64,7 @@ public class SecretActivity
                 } else {
                     SecretManager secMan = SecretManager.getManager(this, login, password);
                     Secret currentSec = secMan.getSecret(secId);
-                    viewBox = SecretViewFactory.getSecretView(this, currentSec);
+                    viewBox = (GroupOfSecretView) SecretViewFactory.getSecretView(this, currentSec);
                 }
 
                 this.setContentView(viewBox);
@@ -91,9 +91,11 @@ public class SecretActivity
     public boolean onCreateOptionsMenu(Menu menu) {
 
         menu.add(Menu.NONE, 1, Menu.NONE, R.string.save_all);
+        menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_all);
+        menu.add(Menu.NONE, 3, Menu.NONE, R.string.desel_all);
 
         if (viewBox instanceof GroupOfSecretView) {
-            menu.add(Menu.NONE, 2, Menu.NONE, R.string.add_prop);
+            menu.add(Menu.NONE, 4, Menu.NONE, R.string.add_prop);
         }
 
         return true;
@@ -113,6 +115,32 @@ public class SecretActivity
 
             return true;
         case 2:
+
+            boolean foundSelected = false;
+
+            for (int k = viewBox.getChildCount() - 1; k >= 0; k--) {
+                View tmpView = viewBox.getChildAt(k);
+                if (tmpView.isSelected()) {
+                    viewBox.removeViewAt(k);
+                    foundSelected = true;
+                }
+            }
+
+            if (foundSelected) {
+                try {
+                    Secret newSecret = SecretViewFactory.getSecret(viewBox);
+                    SecretManager.getManager(this, login, password).putSecret(newSecret);
+                } catch (Exception ex) {
+                    showError(R.string.casket_operr);
+                }
+            }
+
+            return true;
+
+        case 3:
+            return true;
+
+        case 4:
 
             GroupOfSecretView gView = (GroupOfSecretView) viewBox;
             PropertySecretView pView = new PropertySecretView(this);

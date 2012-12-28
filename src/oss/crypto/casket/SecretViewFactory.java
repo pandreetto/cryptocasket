@@ -24,12 +24,6 @@ import android.view.View;
 
 public class SecretViewFactory {
 
-    public interface SecretViewHelper {
-
-        public Secret buildSecret();
-
-    }
-
     public static View getSecretView(Context ctx, Secret secret) {
         try {
 
@@ -46,8 +40,8 @@ public class SecretViewFactory {
     }
 
     public static Secret getSecret(View sView) {
-        if (sView instanceof SecretViewHelper) {
-            return ((SecretViewHelper) sView).buildSecret();
+        if (sView instanceof SecretView) {
+            return ((SecretView) sView).buildSecret();
         }
         return null;
     }
