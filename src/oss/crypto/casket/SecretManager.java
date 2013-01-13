@@ -59,6 +59,8 @@ public class SecretManager {
 
     private String pwd;
 
+    private ArrayList<Secret> secretCache;
+
     private Cipher setupCipher(int type, String pwd)
         throws SecretException {
         try {
@@ -80,6 +82,11 @@ public class SecretManager {
 
     private ArrayList<Secret> readSecrets()
         throws SecretException {
+
+        if (secretCache != null) {
+            return secretCache;
+        }
+
         ArrayList<Secret> result = null;
         BufferedReader reader = null;
         FileInputStream fIn = null;
@@ -156,14 +163,15 @@ public class SecretManager {
                 }
             }
         }
-        
+
         File srcFile = new File(context.getFilesDir(), login + ".crypto.new");
         File tgtFile = new File(context.getFilesDir(), login + ".crypto");
-        
-        if (!srcFile.renameTo(tgtFile)){
+
+        if (!srcFile.renameTo(tgtFile)) {
             throw new SecretException(R.string.noupdatecrypto);
         }
 
+        secretCache = sList;
     }
 
     protected SecretManager(Context ctx, String login, String pwd) {
@@ -171,6 +179,7 @@ public class SecretManager {
         this.context = ctx;
         this.login = login;
         this.pwd = pwd;
+        secretCache = null;
 
         File workDir = context.getFilesDir();
         File cryptoFile = new File(workDir, login + ".crypto");
@@ -195,7 +204,7 @@ public class SecretManager {
     public void destroy()
         throws SecretException {
         File srcFile = new File(login + ".crypto");
-        if(!srcFile.delete()){
+        if (!srcFile.delete()) {
             throw new SecretException(R.string.noupdatecrypto);
         }
     }
