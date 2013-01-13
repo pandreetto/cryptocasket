@@ -33,5 +33,12 @@
     <string name="casket_operr">Cannot perform operation</string>
     <string name="nologorpwd">Missing login or password</string>
     
+    <string name="nosetupchiper">Cannot setup crypto engine</string>
+    <string name="nocryptofile">Cannot find crypto file</string>
+    <string name="errparsecrypto">Error parsing crypto file</string>
+    <string name="existscrypto">Crypto file already exists</string>
+    <string name="unknwsecret">Secret unknown</string>
+    <string name="noupdatecrypto">Cannot update crypto file</string>
+    
     <string name="manager_err1">Error querying secret manager</string>
 </resources>

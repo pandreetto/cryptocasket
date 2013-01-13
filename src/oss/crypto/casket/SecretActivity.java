@@ -69,9 +69,9 @@ public class SecretActivity
 
                 this.setContentView(viewBox);
 
-            } catch (Exception ex) {
+            } catch (SecretException sEx) {
 
-                showError(R.string.casket_operr);
+                showError(sEx.getMsgRef());
 
             }
         }
@@ -109,8 +109,8 @@ public class SecretActivity
             try {
                 Secret newSecret = SecretViewFactory.getSecret(viewBox);
                 SecretManager.getManager(this, login, password).putSecret(newSecret);
-            } catch (Exception ex) {
-                showError(R.string.casket_operr);
+            } catch (SecretException sEx) {
+                showError(sEx.getMsgRef());
             }
 
             return true;

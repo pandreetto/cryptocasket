@@ -72,10 +72,12 @@ public class SecretList
 
                 prepareList(secrets);
 
-            } catch (Exception ex) {
-                Log.e(getLocalClassName(), ex.getMessage(), ex);
-                showError(R.string.list_err1);
+            } catch (SecretException sEx) {
+
+                showError(sEx.getMsgRef());
+
             }
+
         }
 
     }
@@ -106,13 +108,7 @@ public class SecretList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        SecretManager manager = null;
-        try {
-            manager = SecretManager.getManager(this, login, password);
-        } catch (Exception ex) {
-            showError(R.string.manager_err1);
-            return false;
-        }
+        SecretManager manager = SecretManager.getManager(this, login, password);
 
         boolean needRefresh = false;
         switch (item.getItemId()) {
@@ -127,10 +123,12 @@ public class SecretList
                 SecretItemView secView = (SecretItemView) listView.getChildAt(k);
                 if (secView.isSelected()) {
                     try {
+
                         manager.removeSecret(secView.getSecretId());
                         needRefresh = true;
-                    } catch (Exception ex) {
-                        showError(R.string.manager_err1);
+
+                    } catch (SecretException sEx) {
+                        showError(sEx.getMsgRef());
                     }
                 }
             }
@@ -148,8 +146,8 @@ public class SecretList
 
                 prepareList(manager.getSecrets());
 
-            } catch (Exception ex) {
-                showError(R.string.manager_err1);
+            } catch (SecretException sEx) {
+                showError(sEx.getMsgRef());
             }
         }
 

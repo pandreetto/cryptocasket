@@ -19,6 +19,7 @@ package oss.crypto.casket;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,7 +60,7 @@ public class SecretManager {
     private String pwd;
 
     private Cipher setupCipher(int type, String pwd)
-        throws IOException {
+        throws SecretException {
         try {
             PBEKeySpec pbeKey = new PBEKeySpec(pwd.toCharArray(), SALT, INT_COUNT, KEY_LENGTH);
 
@@ -72,12 +73,13 @@ public class SecretManager {
 
             return cipher;
         } catch (Exception ex) {
-            throw new IOException(ex.getMessage());
+            Log.e(SecretManager.class.getName(), ex.getMessage(), ex);
+            throw new SecretException(R.string.nosetupchiper);
         }
     }
 
     private ArrayList<Secret> readSecrets()
-        throws IOException {
+        throws SecretException {
         ArrayList<Secret> result = null;
         BufferedReader reader = null;
         FileInputStream fIn = null;
@@ -85,7 +87,7 @@ public class SecretManager {
         SecretParser parser = null;
 
         try {
-            Cipher cipher = this.setupCipher(Cipher.DECRYPT_MODE, this.pwd);
+            Cipher cipher = setupCipher(Cipher.DECRYPT_MODE, this.pwd);
             fIn = context.openFileInput(this.login + ".crypto");
             CipherInputStream cIn = new CipherInputStream(fIn, cipher);
             reader = new BufferedReader(new InputStreamReader(cIn));
@@ -94,28 +96,42 @@ public class SecretManager {
             parser.parse();
             result = parser.getSecrets();
 
+        } catch (FileNotFoundException fEx) {
+
+            Log.e(SecretManager.class.getName(), fEx.getMessage(), fEx);
+            throw new SecretException(R.string.nocryptofile);
+        } catch (IOException pEx) {
+
+            Log.e(SecretManager.class.getName(), pEx.getMessage(), pEx);
+            throw new SecretException(R.string.errparsecrypto);
+
         } finally {
             if (reader != null) {
-                reader.close();
+                try {
+                    reader.close();
+                } catch (IOException ioEx) {
+                    Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
+                }
             } else if (fIn != null) {
-                fIn.close();
+                try {
+                    fIn.close();
+                } catch (IOException ioEx) {
+                    Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
+                }
             }
         }
         return result;
     }
 
-    /*
-     * TODO missing rollback
-     */
     private void writeSecrets(ArrayList<Secret> sList)
-        throws IOException {
+        throws SecretException {
         FileOutputStream fOut = null;
         SecretWriter writer = null;
 
         try {
-            Cipher cipher = this.setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
+            Cipher cipher = setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
 
-            fOut = this.context.openFileOutput(login + ".crypto", Context.MODE_PRIVATE);
+            fOut = context.openFileOutput(login + ".crypto.new", Context.MODE_PRIVATE);
             CipherOutputStream cOut = new CipherOutputStream(fOut, cipher);
             writer = new SecretWriter(cOut);
 
@@ -124,17 +140,33 @@ public class SecretManager {
                 writer.write(secItem);
             }
 
+        } catch (FileNotFoundException fEx) {
+
+            Log.e(SecretManager.class.getName(), fEx.getMessage(), fEx);
+            throw new SecretException(R.string.nocryptofile);
+
         } finally {
             if (writer != null) {
                 writer.close();
             } else if (fOut != null) {
-                fOut.close();
+                try {
+                    fOut.close();
+                } catch (IOException ioEx) {
+                    Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
+                }
             }
+        }
+        
+        File srcFile = new File(context.getFilesDir(), login + ".crypto.new");
+        File tgtFile = new File(context.getFilesDir(), login + ".crypto");
+        
+        if (!srcFile.renameTo(tgtFile)){
+            throw new SecretException(R.string.noupdatecrypto);
         }
 
     }
 
-    protected SecretManager(Context ctx, String login, String pwd) throws IOException {
+    protected SecretManager(Context ctx, String login, String pwd) {
 
         this.context = ctx;
         this.login = login;
@@ -148,12 +180,12 @@ public class SecretManager {
     }
 
     public void create()
-        throws IOException {
+        throws SecretException {
         File workDir = context.getFilesDir();
         File cryptoFile = new File(workDir, login + ".crypto");
 
         if (cryptoFile.exists()) {
-            throw new IOException("Cryptofile already exists");
+            throw new SecretException(R.string.existscrypto);
         }
 
         ArrayList<Secret> sList = new ArrayList<Secret>(0);
@@ -161,14 +193,15 @@ public class SecretManager {
     }
 
     public void destroy()
-        throws IOException {
-        /*
-         * TODO to be implemented
-         */
+        throws SecretException {
+        File srcFile = new File(login + ".crypto");
+        if(!srcFile.delete()){
+            throw new SecretException(R.string.noupdatecrypto);
+        }
     }
 
     public Secret[] getSecrets()
-        throws IOException {
+        throws SecretException {
 
         ArrayList<Secret> resList = readSecrets();
         Secret[] result = new Secret[resList.size()];
@@ -178,7 +211,7 @@ public class SecretManager {
     }
 
     public Secret getSecret(String secretId)
-        throws IOException {
+        throws SecretException {
         ArrayList<Secret> resList = readSecrets();
         for (Secret tmpsec : resList) {
             if (tmpsec.getId().equals(secretId)) {
@@ -186,11 +219,11 @@ public class SecretManager {
             }
         }
 
-        throw new IOException("Cannot find " + secretId);
+        throw new SecretException(R.string.unknwsecret);
     }
 
     public void putSecret(Secret secret)
-        throws IOException {
+        throws SecretException {
         int idx = 0;
         ArrayList<Secret> resList = readSecrets();
         for (Secret secItem : resList) {
@@ -210,7 +243,7 @@ public class SecretManager {
     }
 
     public void removeSecret(String secretId)
-        throws IOException {
+        throws SecretException {
         ArrayList<Secret> resList = readSecrets();
         int idx = 0;
         boolean found = false;
@@ -231,14 +264,13 @@ public class SecretManager {
     }
 
     public void removeSecret(Secret secret)
-        throws IOException {
+        throws SecretException {
         removeSecret(secret.getId());
     }
 
     private static SecretManager theManager = null;
 
-    public static SecretManager getManager(Context ctx, String login, String pwd)
-        throws IOException {
+    public static SecretManager getManager(Context ctx, String login, String pwd) {
 
         if (theManager == null || (theManager.login != login && theManager.pwd != pwd)) {
             theManager = new SecretManager(ctx, login, pwd);

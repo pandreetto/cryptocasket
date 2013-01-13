@@ -187,6 +187,11 @@ public class CasketLogin
                 SecretManager manager = SecretManager.getManager(this, loginName, pwd);
                 manager.getSecrets();
 
+            } catch (SecretException sEx) {
+
+                showError(sEx.getMsgRef());
+                return;
+
             } catch (Exception ex) {
 
                 showError(R.string.casket_err);
@@ -245,8 +250,10 @@ public class CasketLogin
                     startActivity(intent);
                 }
 
-            } catch (Exception ex) {
-                showError(R.string.casket_operr);
+            } catch (SecretException sEx) {
+
+                showError(sEx.getMsgRef());
+
             }
 
         } else if (btnId == DISC_ID) {
