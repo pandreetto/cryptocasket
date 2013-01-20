@@ -113,7 +113,7 @@ public class SecretActivity
                 showError(sEx.getMsgRef());
             }
 
-            backToTheList();
+            finish();
 
             return true;
         case 2:
@@ -137,7 +137,7 @@ public class SecretActivity
                 }
             }
 
-            backToTheList();
+            finish();
 
             return true;
 
@@ -172,13 +172,4 @@ public class SecretActivity
 
     }
 
-    private void backToTheList() {
-
-        Intent intent = new Intent(this, SecretList.class);
-        intent.putExtra(CasketConstants.LOGIN_TAG, login);
-        intent.putExtra(CasketConstants.PWD_TAG, password);
-
-        startActivity(intent);
-
-    }
 }
