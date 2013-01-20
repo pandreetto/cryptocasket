@@ -113,6 +113,8 @@ public class SecretActivity
                 showError(sEx.getMsgRef());
             }
 
+            backToTheList();
+
             return true;
         case 2:
 
@@ -134,6 +136,8 @@ public class SecretActivity
                     showError(R.string.casket_operr);
                 }
             }
+
+            backToTheList();
 
             return true;
 
@@ -165,6 +169,16 @@ public class SecretActivity
 
         AlertDialog errDialog = builder.create();
         errDialog.show();
+
+    }
+
+    private void backToTheList() {
+
+        Intent intent = new Intent(this, SecretList.class);
+        intent.putExtra(CasketConstants.LOGIN_TAG, login);
+        intent.putExtra(CasketConstants.PWD_TAG, password);
+
+        startActivity(intent);
 
     }
 }

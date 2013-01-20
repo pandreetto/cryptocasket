@@ -230,6 +230,8 @@ public class SecretList
     public class SecretItemView
         extends LinearLayout {
 
+        private final static int TEXT_SIZE = 32;
+
         public SecretItemView(SecretList ctx, Secret secret) {
             super(ctx);
 
@@ -250,6 +252,7 @@ public class SecretList
             tView.setOnLongClickListener(ctx);
             ColorStateList cList = this.getResources().getColorStateList(R.color.secretviewitem);
             tView.setTextColor(cList);
+            tView.setTextSize(TEXT_SIZE);
             tView.setPadding(10, 10, 10, 10);
 
             tView.setText(secret.getId());

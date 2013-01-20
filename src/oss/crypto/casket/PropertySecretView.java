@@ -36,6 +36,8 @@ public class PropertySecretView
     private final static LinearLayout.LayoutParams col2Params = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, (float) 0.3);
 
+    private final static int TEXT_SIZE = 24;
+
     private Context context;
 
     public PropertySecretView(Context ctx) {
@@ -48,11 +50,13 @@ public class PropertySecretView
         EditText keyField = new EditText(ctx);
         keyField.setHint(R.string.key_hint);
         keyField.setLayoutParams(col1Params);
+        keyField.setTextSize(TEXT_SIZE);
         this.addView(keyField);
 
         EditText valueField = new EditText(ctx);
         valueField.setHint(R.string.value_hint);
         valueField.setLayoutParams(col2Params);
+        valueField.setTextSize(TEXT_SIZE);
         this.addView(valueField);
 
     }
@@ -70,12 +74,14 @@ public class PropertySecretView
         keyField.setLayoutParams(col1Params);
         ColorStateList cList = context.getResources().getColorStateList(R.color.secretviewitem);
         keyField.setTextColor(cList);
+        keyField.setTextSize(TEXT_SIZE);
         keyField.setOnLongClickListener(this);
         this.addView(keyField);
 
         EditText valueField = new EditText(ctx);
         valueField.setText(pSecret.getValue());
         valueField.setLayoutParams(col2Params);
+        valueField.setTextSize(TEXT_SIZE);
         this.addView(valueField);
 
     }
