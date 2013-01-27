@@ -16,10 +16,12 @@
     <string name="desel_all">Deselect all</string>
     <string name="sec_id_hint">Secret Id</string>
     <string name="add_prop">Add Property</string>
+    <string name="add_phone">Add Phone</string>
     <string name="save_all">Save all</string>
     <string name="rmv_item">Remove Item</string>
     <string name="sel_item">Toggle selection</string>
     <string name="mod_item">Modify Item</string>
+    <string name="call_item">Call number</string>
     <string name="canc_pop">Cancel</string>
     <string name="ok_dbtn">OK</string>
     <string name="err_dmsg">Error</string>

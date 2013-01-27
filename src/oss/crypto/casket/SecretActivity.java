@@ -96,6 +96,7 @@ public class SecretActivity
 
         if (viewBox instanceof GroupOfSecretView) {
             menu.add(Menu.NONE, 4, Menu.NONE, R.string.add_prop);
+            menu.add(Menu.NONE, 5, Menu.NONE, R.string.add_phone);
         }
 
         return true;
@@ -149,6 +150,13 @@ public class SecretActivity
             GroupOfSecretView gView = (GroupOfSecretView) viewBox;
             PropertySecretView pView = new PropertySecretView(this);
             gView.addView(pView);
+            return true;
+
+        case 5:
+
+            GroupOfSecretView gView2 = (GroupOfSecretView) viewBox;
+            PhoneSecretView phView = new PhoneSecretView(this);
+            gView2.addView(phView);
             return true;
 
         }

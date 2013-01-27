@@ -52,12 +52,14 @@ public class PropertySecretView
         keyField.setHint(R.string.key_hint);
         keyField.setLayoutParams(col1Params);
         keyField.setTextSize(TEXT_SIZE);
+        keyField.setInputType(InputType.TYPE_CLASS_TEXT);
         this.addView(keyField);
 
         EditText valueField = new EditText(ctx);
         valueField.setHint(R.string.value_hint);
         valueField.setLayoutParams(col2Params);
         valueField.setTextSize(TEXT_SIZE);
+        valueField.setInputType(this.getInputType());
         this.addView(valueField);
 
     }
@@ -117,8 +119,9 @@ public class PropertySecretView
             return true;
         case 2:
             EditText eText = (EditText) this.getChildAt(1);
-            eText.setInputType(InputType.TYPE_CLASS_TEXT);
+            eText.setInputType(this.getInputType());
             eText.requestFocus();
+            return true;
         }
         return false;
     }
@@ -131,6 +134,10 @@ public class PropertySecretView
     public boolean isSelected() {
         TextView tmpv = (TextView) this.getChildAt(0);
         return tmpv.isSelected();
+    }
+
+    protected int getInputType() {
+        return InputType.TYPE_CLASS_TEXT;
     }
 
 }
