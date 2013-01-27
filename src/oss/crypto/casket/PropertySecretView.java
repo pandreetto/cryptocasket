@@ -18,6 +18,7 @@ package oss.crypto.casket;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,7 +39,7 @@ public class PropertySecretView
 
     private final static int TEXT_SIZE = 24;
 
-    private Context context;
+    protected Context context;
 
     public PropertySecretView(Context ctx) {
         super(ctx);
@@ -82,6 +83,8 @@ public class PropertySecretView
         valueField.setText(pSecret.getValue());
         valueField.setLayoutParams(col2Params);
         valueField.setTextSize(TEXT_SIZE);
+        valueField.setOnLongClickListener(this);
+        valueField.setInputType(InputType.TYPE_NULL);
         this.addView(valueField);
 
     }
@@ -102,7 +105,6 @@ public class PropertySecretView
         Menu menu = popMenu.getMenu();
         menu.add(Menu.NONE, 1, Menu.NONE, R.string.sel_item);
         menu.add(Menu.NONE, 2, Menu.NONE, R.string.mod_item);
-        menu.add(Menu.NONE, 3, Menu.NONE, R.string.canc_pop);
         popMenu.show();
 
         return true;
@@ -113,6 +115,10 @@ public class PropertySecretView
         case 1:
             setSelected(!isSelected());
             return true;
+        case 2:
+            EditText eText = (EditText) this.getChildAt(1);
+            eText.setInputType(InputType.TYPE_CLASS_TEXT);
+            eText.requestFocus();
         }
         return false;
     }
