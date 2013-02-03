@@ -213,6 +213,21 @@ public class SecretManager {
         }
     }
 
+    public void changePassword(String newPwd)
+        throws SecretException {
+        ArrayList<Secret> resList = readSecrets();
+        String oldPwd = pwd;
+        try {
+            pwd = newPwd;
+            writeSecrets(resList);
+            oldPwd = null;
+        } finally {
+            if (oldPwd != null) {
+                pwd = oldPwd;
+            }
+        }
+    }
+
     public Secret[] getSecrets()
         throws SecretException {
 
