@@ -22,7 +22,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -60,23 +59,16 @@ public class SecretList
         login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
 
-        if (login == null || password == null) {
+        try {
 
-            Log.d(getLocalClassName(), "No login or pwd");
+            Secret[] secrets = SecretManager.getManager(this, login, password).getSecrets();
 
-        } else {
+            prepareList(secrets);
 
-            try {
+        } catch (SecretException sEx) {
 
-                Secret[] secrets = SecretManager.getManager(this, login, password).getSecrets();
-
-                prepareList(secrets);
-
-            } catch (SecretException sEx) {
-
-                showError(sEx.getMsgRef());
-
-            }
+            showError(sEx.getMsgRef());
+            finish();
 
         }
 
@@ -108,8 +100,6 @@ public class SecretList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        SecretManager manager = SecretManager.getManager(this, login, password);
-
         boolean needRefresh = false;
         switch (item.getItemId()) {
         case 1:
@@ -123,6 +113,8 @@ public class SecretList
                 SecretItemView secView = (SecretItemView) listView.getChildAt(k);
                 if (secView.isSelected()) {
                     try {
+
+                        SecretManager manager = SecretManager.getManager(this, login, password);
 
                         manager.removeSecret(secView.getSecretId());
                         needRefresh = true;
@@ -143,6 +135,8 @@ public class SecretList
 
         if (needRefresh) {
             try {
+
+                SecretManager manager = SecretManager.getManager(this, login, password);
 
                 prepareList(manager.getSecrets());
 

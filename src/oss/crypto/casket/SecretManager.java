@@ -174,12 +174,16 @@ public class SecretManager {
         secretCache = sList;
     }
 
-    protected SecretManager(Context ctx, String login, String pwd) {
+    protected SecretManager(Context ctx, String login, String pwd) throws SecretException {
 
         this.context = ctx;
         this.login = login;
         this.pwd = pwd;
         secretCache = null;
+
+        if (login == null || login.trim().length() == 0 || pwd == null || pwd.trim().length() == 0) {
+            throw new SecretException(R.string.nologorpwd);
+        }
 
         File workDir = context.getFilesDir();
         File cryptoFile = new File(workDir, login + ".crypto");
@@ -279,7 +283,8 @@ public class SecretManager {
 
     private static SecretManager theManager = null;
 
-    public static SecretManager getManager(Context ctx, String login, String pwd) {
+    public static SecretManager getManager(Context ctx, String login, String pwd)
+        throws SecretException {
 
         if (theManager == null || (theManager.login != login && theManager.pwd != pwd)) {
             theManager = new SecretManager(ctx, login, pwd);
@@ -287,4 +292,5 @@ public class SecretManager {
 
         return theManager;
     }
+
 }
