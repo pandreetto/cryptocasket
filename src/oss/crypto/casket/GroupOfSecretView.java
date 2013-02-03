@@ -52,6 +52,7 @@ public class GroupOfSecretView
         secIdText.setEnabled(false);
         secIdText.setGravity(Gravity.CENTER);
         secIdText.setPadding(5, 5, 5, 5);
+        secIdText.setTextSize(24);
         this.addView(secIdText);
 
         for (Secret secItem : gSecret) {

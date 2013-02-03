@@ -267,6 +267,7 @@ public class SecretList
         public void setSelected(boolean sel) {
             TextView tmpv = (TextView) this.getChildAt(0);
             tmpv.setSelected(sel);
+            tmpv.setBackgroundResource(sel ? R.color.mainbg : 0);
         }
     }
 

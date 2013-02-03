@@ -129,6 +129,7 @@ public class PropertySecretView
     public void setSelected(boolean sel) {
         TextView keyField = (TextView) this.getChildAt(0);
         keyField.setSelected(sel);
+        keyField.setBackgroundResource(sel ? R.color.mainbg : 0);
     }
 
     public boolean isSelected() {
