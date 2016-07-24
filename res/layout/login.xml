@@ -2,13 +2,27 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:background="@color/gray1"
     android:paddingLeft="16dp"
     android:paddingRight="16dp" >
+
+    <ImageView
+        android:id="@+id/Logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="false"
+        android:baselineAlignBottom="false"
+        android:contentDescription="@string/cryptotitle"
+        android:scaleType="fitCenter"
+        android:src="@drawable/cc_launcher"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp" />
 
     <TextView
         android:id="@+id/login_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/Logo"
         android:text="@string/login_text" />
     
     <EditText
@@ -28,12 +42,11 @@
 
     <EditText
         android:id="@+id/pwd_message"
-        android:inputType="textPassword"
+        android:inputType="textPassword|textNoSuggestions"
         android:hint=""
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/pwd_text"
-        android:password="true" />
+        android:layout_below="@id/pwd_text" />
 
     <Button
         android:id="@+id/canc_btn"
@@ -81,12 +94,11 @@
 
     <EditText
         android:id="@+id/repwd_message"
-        android:inputType="textPassword"
+        android:inputType="textPassword|textNoSuggestions"
         android:hint=""
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/repwd_text"
-        android:password="true"
         android:visibility="invisible" />
 
     <Button

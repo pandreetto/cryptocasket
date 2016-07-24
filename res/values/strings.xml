@@ -43,4 +43,6 @@
     <string name="noupdatecrypto">Cannot update crypto file</string>
     
     <string name="manager_err1">Error querying secret manager</string>
+    
+    <string name="cryptotitle">Crypto Casket</string>
 </resources>
