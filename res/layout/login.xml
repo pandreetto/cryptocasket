@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/gray1"
@@ -10,19 +11,18 @@
         android:id="@+id/Logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="20dp"
         android:adjustViewBounds="false"
         android:baselineAlignBottom="false"
         android:contentDescription="@string/cryptotitle"
         android:scaleType="fitCenter"
-        android:src="@drawable/cc_launcher"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="20dp" />
+        android:src="@drawable/cc_launcher" />
 
     <TextView
         android:id="@+id/login_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/Logo"
         android:text="@string/login_text" />
     
     <EditText
@@ -30,14 +30,12 @@
         android:inputType="text"
         android:hint=""
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/login_text" />
+        android:layout_height="wrap_content" />
 
      <TextView
         android:id="@+id/pwd_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/login_message"
         android:text="@string/pwd_text" />
 
     <EditText
@@ -45,50 +43,61 @@
         android:inputType="textPassword|textNoSuggestions"
         android:hint=""
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/pwd_text" />
+        android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/canc_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/pwd_message"
-        android:onClick="goOut"
-        android:text="@string/cancel_btn" />
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    
+        <Button
+            android:id="@+id/login_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="login"
+            android:text="@string/login_btn" />
+        
+	    <Button
+	        android:id="@+id/canc_btn"
+	        style="android:buttonBarButtonStyle"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:onClick="goOut"
+	        android:text="@string/cancel_btn" />
 
-    <Button
-        android:id="@+id/login_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/pwd_message"
-        android:layout_toLeftOf="@id/canc_btn"
-        android:onClick="login"
-        android:text="@string/login_btn" />
+	</LinearLayout>
+    
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/register_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/pwd_message"
-        android:layout_toLeftOf="@+id/login_btn"
-        android:onClick="confirmPwd"
-        android:text="@string/register_btn" />
+        <Button
+            android:id="@+id/register_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="registerUser"
+            android:text="@string/register_btn" />
 
-    <Button
-        android:id="@+id/destroy_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/pwd_message"
-        android:layout_toLeftOf="@+id/register_btn"
-        android:onClick="confirmPwd"
-        android:text="@string/destroy_btn" />
+        <Button
+            android:id="@+id/destroy_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="destroyUser"
+            android:text="@string/destroy_btn" />
+
+    </LinearLayout>
+    
     
     <TextView
         android:id="@+id/repwd_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/register_btn"
         android:text="@string/repwd_text"
         android:visibility="invisible" />
 
@@ -98,27 +107,32 @@
         android:hint=""
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/repwd_text"
         android:visibility="invisible" />
 
-    <Button
-        android:id="@+id/confirm_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/repwd_message"
-        android:onClick="doAction"
-        android:text="@string/confirm_btn"
-        android:visibility="invisible" />
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/discard_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/repwd_message"
-        android:layout_toLeftOf="@+id/confirm_btn"
-        android:onClick="goOut"
-        android:text="@string/discard_btn"
-        android:visibility="invisible" />
+        <Button
+            android:id="@+id/confirm_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="doAction"
+            android:text="@string/confirm_btn"
+            android:visibility="invisible" />
+	
+	    <Button
+	        android:id="@+id/discard_btn"
+	        style="android:buttonBarButtonStyle"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:onClick="goOut"
+	        android:text="@string/discard_btn"
+	        android:visibility="invisible" />
 
-</RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>
