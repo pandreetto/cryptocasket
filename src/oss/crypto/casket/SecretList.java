@@ -16,32 +16,31 @@
 
 package oss.crypto.casket;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class SecretList
-    extends Activity
-    implements View.OnClickListener, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener,
-    DialogInterface.OnClickListener {
+    extends ListActivity
+    implements DialogInterface.OnClickListener {
 
     private String login;
 
     private String password;
-
-    private LinearLayout listView;
-
-    private String currentSelItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,7 +62,8 @@ public class SecretList
 
             Secret[] secrets = SecretManager.getManager(this, login, password).getSecrets();
 
-            prepareList(secrets);
+            SecretArrayAdapter<Secret> adapter = new SecretArrayAdapter<Secret>(this, R.layout.secretitem, secrets);
+            setListAdapter(adapter);
 
         } catch (SecretException sEx) {
 
@@ -100,7 +100,6 @@ public class SecretList
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        boolean needRefresh = false;
         switch (item.getItemId()) {
         case 1:
             Intent intent = new Intent(this, SecretActivity.class);
@@ -109,46 +108,43 @@ public class SecretList
             startActivity(intent);
             break;
         case 2:
-            for (int k = 0; k < listView.getChildCount(); k++) {
-                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
-                if (secView.isSelected()) {
-                    try {
+            ListView interView = this.getListView();
+            boolean needRefresh = false;
 
-                        SecretManager manager = SecretManager.getManager(this, login, password);
-
-                        manager.removeSecret(secView.getSecretId());
-                        needRefresh = true;
-
-                    } catch (SecretException sEx) {
-                        showError(sEx.getMsgRef());
-                    }
-                }
-            }
-            break;
-        case 3:
-            for (int k = 0; k < listView.getChildCount(); k++) {
-                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
-                secView.setSelected(false);
-            }
-            break;
-        }
-
-        if (needRefresh) {
             try {
-
                 SecretManager manager = SecretManager.getManager(this, login, password);
 
-                prepareList(manager.getSecrets());
+                for (int k = 0; k < interView.getChildCount(); k++) {
+                    LinearLayout llItem = (LinearLayout) interView.getChildAt(k);
+                    CheckBox cBox = (CheckBox) llItem.findViewById(R.id.secCheckBox);
+                    TextView tView = (TextView) llItem.findViewById(R.id.secret_id);
+                    if (cBox.isChecked()) {
+                        String secId = tView.getText().toString();
+                        manager.removeSecret(secId);
+                        needRefresh = true;
+                        Log.d("SecretList", "Removed " + secId);
+                    }
+                }
+
+                if (needRefresh) {
+                    SecretArrayAdapter<Secret> adapter = new SecretArrayAdapter<Secret>(this, R.layout.secretitem,
+                            manager.getSecrets());
+                    setListAdapter(adapter);
+                }
 
             } catch (SecretException sEx) {
                 showError(sEx.getMsgRef());
             }
+
+            break;
+        case 3:
+            break;
         }
 
         return false;
     }
 
-    public void onClick(View sView) {
+    public void openSecret(View sView) {
         TextView tView = (TextView) sView;
         String sId = tView.getText().toString();
         Intent intent = new Intent(this, SecretActivity.class);
@@ -158,53 +154,7 @@ public class SecretList
         startActivity(intent);
     }
 
-    public boolean onLongClick(View tView) {
-
-        currentSelItem = ((TextView) tView).getText().toString();
-
-        PopupMenu popMenu = new PopupMenu(this, tView);
-        popMenu.setOnMenuItemClickListener(this);
-        Menu menu = popMenu.getMenu();
-        menu.add(Menu.NONE, 1, Menu.NONE, R.string.sel_item);
-        menu.add(Menu.NONE, 2, Menu.NONE, R.string.canc_pop);
-        popMenu.show();
-
-        return true;
-    }
-
-    public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-        case 1:
-            for (int k = 0; k < listView.getChildCount(); k++) {
-                SecretItemView secView = (SecretItemView) listView.getChildAt(k);
-                if (secView.getSecretId() == currentSelItem) {
-                    secView.setSelected(!secView.isSelected());
-                }
-            }
-            currentSelItem = null;
-            return true;
-        case 2:
-            currentSelItem = null;
-            return true;
-        }
-        return false;
-    }
-
     public void onClick(DialogInterface dialog, int id) {
-
-    }
-
-    private void prepareList(Secret[] secrets) {
-
-        listView = new LinearLayout(this);
-        listView.setOrientation(LinearLayout.VERTICAL);
-
-        for (Secret secItem : secrets) {
-            SecretItemView secView = new SecretItemView(this, secItem);
-            listView.addView(secView);
-        }
-
-        this.setContentView(listView);
 
     }
 
@@ -221,53 +171,23 @@ public class SecretList
 
     }
 
-    public class SecretItemView
-        extends LinearLayout {
+    private class SecretArrayAdapter<T>
+        extends ArrayAdapter<T> {
 
-        private final static int TEXT_SIZE = 32;
-
-        public SecretItemView(SecretList ctx, Secret secret) {
-            super(ctx);
-
-            this.setOrientation(HORIZONTAL);
-
-            ViewGroup.LayoutParams lParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            this.setLayoutParams(lParams);
-
-            TextView tView = new TextView(ctx);
-            ViewGroup.LayoutParams tParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT);
-            tView.setLayoutParams(tParams);
-
-            tView.setClickable(true);
-            tView.setLongClickable(true);
-            tView.setOnClickListener(ctx);
-            tView.setOnLongClickListener(ctx);
-            ColorStateList cList = this.getResources().getColorStateList(R.color.secretviewitem);
-            tView.setTextColor(cList);
-            tView.setTextSize(TEXT_SIZE);
-            tView.setPadding(10, 10, 10, 10);
-
-            tView.setText(secret.getId());
-
-            this.addView(tView);
+        public SecretArrayAdapter(Context ctx, int resource, T[] objects) {
+            super(ctx, resource, objects);
         }
 
-        public String getSecretId() {
-            TextView tmpv = (TextView) this.getChildAt(0);
-            return tmpv.getText().toString();
-        }
+        public View getView(int pos, View convView, ViewGroup parent) {
+            if (convView != null)
+                return convView;
 
-        public boolean isSelected() {
-            TextView tmpv = (TextView) this.getChildAt(0);
-            return tmpv.isSelected();
-        }
+            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LinearLayout result = (LinearLayout) inflater.inflate(R.layout.secretitem, null);
 
-        public void setSelected(boolean sel) {
-            TextView tmpv = (TextView) this.getChildAt(0);
-            tmpv.setSelected(sel);
-            tmpv.setBackgroundResource(sel ? R.color.mainbg : 0);
+            TextView tView = (TextView) result.findViewById(R.id.secret_id);
+            tView.setText(getItem(pos).toString());
+            return result;
         }
     }
 
