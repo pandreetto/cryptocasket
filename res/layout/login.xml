@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/gray1"
+    android:background="@color/mainbg"
     android:paddingLeft="16dp"
     android:paddingRight="16dp" >
 
@@ -23,12 +23,14 @@
         android:id="@+id/login_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/txtcolor"
         android:text="@string/login_text" />
     
     <EditText
         android:id="@+id/login_message"
-        android:inputType="text"
+        android:inputType="text|textNoSuggestions"
         android:hint=""
+        android:textColor="@color/txtcolor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -36,12 +38,14 @@
         android:id="@+id/pwd_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/txtcolor"
         android:text="@string/pwd_text" />
 
     <EditText
         android:id="@+id/pwd_message"
         android:inputType="textPassword|textNoSuggestions"
         android:hint=""
+        android:textColor="@color/txtcolor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -98,6 +102,7 @@
         android:id="@+id/repwd_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/txtcolor"
         android:text="@string/repwd_text"
         android:visibility="invisible" />
 
@@ -105,6 +110,7 @@
         android:id="@+id/repwd_message"
         android:inputType="textPassword|textNoSuggestions"
         android:hint=""
+        android:textColor="@color/txtcolor"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible" />

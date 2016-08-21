@@ -17,6 +17,8 @@
 package oss.crypto.casket;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,13 +32,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class SecretList
-    extends ListActivity
-    implements DialogInterface.OnClickListener {
+    extends ListActivity {
 
     private String login;
 
@@ -102,10 +104,8 @@ public class SecretList
 
         switch (item.getItemId()) {
         case 1:
-            Intent intent = new Intent(this, SecretActivity.class);
-            intent.putExtra(CasketConstants.LOGIN_TAG, login);
-            intent.putExtra(CasketConstants.PWD_TAG, password);
-            startActivity(intent);
+            SecretDialogFragment sDialog = new SecretDialogFragment(this);
+            sDialog.show(getFragmentManager(), "CREATE_SECRET");
             break;
         case 2:
             ListView interView = this.getListView();
@@ -154,8 +154,23 @@ public class SecretList
         startActivity(intent);
     }
 
-    public void onClick(DialogInterface dialog, int id) {
+    public void createNewSecret(String secId) {
+        try {
+            GroupOfSecret gSecret = new GroupOfSecret();
+            gSecret.setId(secId);
 
+            SecretManager manager = SecretManager.getManager(this, login, password);
+            manager.putSecret(gSecret);
+
+        } catch (SecretException sEx) {
+            showError(sEx.getMsgRef());
+        }
+
+        Intent intent = new Intent(this, SecretActivity.class);
+        intent.putExtra(CasketConstants.LOGIN_TAG, login);
+        intent.putExtra(CasketConstants.PWD_TAG, password);
+        intent.putExtra(CasketConstants.SECID_TAG, secId);
+        startActivity(intent);
     }
 
     private void showError(int msgId) {
@@ -164,7 +179,13 @@ public class SecretList
         builder.setTitle(R.string.err_dmsg);
         builder.setMessage(msgId);
 
-        builder.setPositiveButton(R.string.ok_dbtn, this);
+        builder.setPositiveButton(R.string.ok_dbtn, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                /*
+                 * TODO implement
+                 */
+            }
+        });
 
         AlertDialog errDialog = builder.create();
         errDialog.show();
@@ -188,6 +209,42 @@ public class SecretList
             TextView tView = (TextView) result.findViewById(R.id.secret_id);
             tView.setText(getItem(pos).toString());
             return result;
+        }
+    }
+
+    private class SecretDialogFragment
+        extends DialogFragment {
+
+        private SecretList context;
+
+        private View dialogView;
+
+        public SecretDialogFragment(SecretList ctx) {
+            super();
+            context = ctx;
+        }
+
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            dialogView = inflater.inflate(R.layout.dialog_newsec, null);
+            builder.setView(dialogView);
+
+            builder.setPositiveButton(R.string.ok_dbtn, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    EditText secText = (EditText) dialogView.findViewById(R.id.newsec_value);
+                    context.createNewSecret(secText.getText().toString());
+                }
+            });
+
+            builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+
+            return builder.create();
         }
     }
 

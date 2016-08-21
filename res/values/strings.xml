@@ -45,4 +45,6 @@
     <string name="manager_err1">Error querying secret manager</string>
     
     <string name="cryptotitle">Crypto Casket</string>
+    <string name="enter_seckey">Enter secret ID</string>
+    
 </resources>

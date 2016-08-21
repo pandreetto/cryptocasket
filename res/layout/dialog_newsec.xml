@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/mainbg"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/newsec_title"
+        android:textColor="@color/txtcolor"
+        android:text="@string/enter_seckey"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp" />
+    
+    <EditText
+	    android:id="@+id/newsec_value"
+	    android:inputType="text|textNoSuggestions"
+	    android:hint=""
+	    android:textColor="@color/txtcolor"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content" />
+
+</LinearLayout>
