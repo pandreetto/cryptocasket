@@ -22,16 +22,17 @@ import java.util.Iterator;
 import org.xml.sax.Attributes;
 
 public class GroupOfSecret
+    extends ArrayList<Secret>
     implements Secret, Iterable<Secret> {
 
-    private String id;
+    public static final long serialVersionUID = 1472057412L;
 
-    private ArrayList<Secret> secretList;
+    private String id;
 
     private Secret currSecret;
 
     public GroupOfSecret() {
-        secretList = new ArrayList<Secret>();
+        super();
         id = null;
         currSecret = null;
     }
@@ -44,16 +45,19 @@ public class GroupOfSecret
         this.id = id;
     }
 
+    @Deprecated
     public void addSecret(Secret sec) {
-        secretList.add(sec);
+        super.add(sec);
     }
 
+    @Deprecated
     public void removeSecret(Secret sec) {
-        secretList.remove(sec);
+        super.remove(sec);
     }
 
+    @Deprecated
     public Iterator<Secret> iterator() {
-        return secretList.iterator();
+        return super.iterator();
     }
 
     public void processStartElement(String qName, Attributes attributes) {
@@ -76,7 +80,7 @@ public class GroupOfSecret
     public void processEndElement(String qName) {
         if (qName.equals("secretitem")) {
 
-            secretList.add(currSecret);
+            this.add(currSecret);
             currSecret = null;
 
         } else if (!qName.equals("group")) {
@@ -96,7 +100,7 @@ public class GroupOfSecret
 
         StringBuffer buff = new StringBuffer();
         buff.append("<group id=\"").append(id).append("\"/>\n");
-        for (Secret secItem : secretList) {
+        for (Secret secItem : this) {
             buff.append("<secretitem class=\"");
             buff.append(secItem.getClass().getName()).append("\">");
             buff.append(secItem.toXML());

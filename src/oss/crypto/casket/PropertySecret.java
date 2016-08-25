@@ -19,7 +19,7 @@ package oss.crypto.casket;
 import org.xml.sax.Attributes;
 
 public class PropertySecret
-    implements Secret {
+    implements RenderableSecret {
 
     private String key;
 
@@ -36,6 +36,18 @@ public class PropertySecret
 
     public String getId() {
         return key;
+    }
+    
+    public int getLayoutId() {
+        return R.layout.secretprop;
+    }
+
+    public int getKeyResourceId() {
+        return R.id.prop_key;
+    }
+
+    public int getValueResourceId() {
+        return R.id.prop_value;
     }
 
     public void setId(String id) {

@@ -16,18 +16,25 @@
 
 package oss.crypto.casket;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Adapter;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.TextView;
 
 public class SecretActivity
-    extends Activity
-    implements DialogInterface.OnClickListener {
+    extends ListActivity {
 
     private GroupOfSecretView viewBox = null;
 
@@ -49,7 +56,7 @@ public class SecretActivity
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
         String secId = intent.getStringExtra(CasketConstants.SECID_TAG);
 
-        if (login == null || password == null) {
+        if (login == null || password == null || secId == null) {
 
             showError(R.string.nologorpwd);
 
@@ -57,17 +64,11 @@ public class SecretActivity
 
             try {
 
-                if (secId == null) {
+                SecretManager secMan = SecretManager.getManager(this, login, password);
 
-                    viewBox = new GroupOfSecretView(this);
-
-                } else {
-                    SecretManager secMan = SecretManager.getManager(this, login, password);
-                    Secret currentSec = secMan.getSecret(secId);
-                    viewBox = (GroupOfSecretView) SecretViewFactory.getSecretView(this, currentSec);
-                }
-
-                this.setContentView(viewBox);
+                GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secId);
+                SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
+                setListAdapter(sAdapter);
 
             } catch (SecretException sEx) {
 
@@ -163,7 +164,7 @@ public class SecretActivity
         return false;
     }
 
-    public void onClick(DialogInterface dialog, int id) {
+    public void callPhone(View phoneView) {
 
     }
 
@@ -173,10 +174,90 @@ public class SecretActivity
         builder.setTitle(R.string.err_dmsg);
         builder.setMessage(msgId);
 
-        builder.setPositiveButton(R.string.ok_dbtn, this);
-
+        builder.setPositiveButton(R.string.ok_dbtn, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                /*
+                 * TODO implement
+                 */
+            }
+        });
         AlertDialog errDialog = builder.create();
         errDialog.show();
+
+    }
+
+    private class SecretTableAdapter
+        implements ListAdapter {
+
+        private GroupOfSecret secrets;
+
+        private LayoutInflater inflater;
+
+        public SecretTableAdapter(GroupOfSecret secrets, SecretActivity context) {
+            this.secrets = secrets;
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        public int getCount() {
+            return secrets.size();
+        }
+
+        public Object getItem(int position) {
+            return secrets.get(position);
+        }
+
+        public long getItemId(int position) {
+            return secrets.get(position).getId().hashCode();
+        }
+
+        public int getItemViewType(int position) {
+            return Adapter.IGNORE_ITEM_VIEW_TYPE;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            RenderableSecret tmpsec = (RenderableSecret) secrets.get(position);
+            LinearLayout result = (LinearLayout) inflater.inflate(tmpsec.getLayoutId(), null);
+
+            TextView keyText = (TextView) result.findViewById(tmpsec.getKeyResourceId());
+            keyText.setText(tmpsec.getId());
+
+            TextView valueText = (TextView) result.findViewById(tmpsec.getValueResourceId());
+            valueText.setText(tmpsec.getValue());
+
+            return result;
+        }
+
+        public int getViewTypeCount() {
+            return 1;
+        }
+
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        public boolean isEmpty() {
+            return secrets.size() == 0;
+        }
+
+        public void registerDataSetObserver(DataSetObserver observer) {
+            /*
+             * TODO implement
+             */
+        }
+
+        public void unregisterDataSetObserver(DataSetObserver observer) {
+            /*
+             * TODO implement
+             */
+        }
+
+        public boolean areAllItemsEnabled() {
+            return true;
+        }
+
+        public boolean isEnabled(int position) {
+            return true;
+        }
 
     }
 

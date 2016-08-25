@@ -19,4 +19,16 @@ package oss.crypto.casket;
 public class PhoneSecret
     extends PropertySecret {
 
+    public int getLayoutId() {
+        return R.layout.secretphone;
+    }
+
+    public int getKeyResourceId() {
+        return R.id.phone_key;
+    }
+
+    public int getValueResourceId() {
+        return R.id.phone_value;
+    }
+
 }
