@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+@Deprecated
 public class PropertySecretView
     extends LinearLayout
     implements SecretView, View.OnLongClickListener, PopupMenu.OnMenuItemClickListener {

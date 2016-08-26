@@ -22,6 +22,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
+@Deprecated
 public class SecretViewFactory {
 
     public static View getSecretView(Context ctx, Secret secret) {

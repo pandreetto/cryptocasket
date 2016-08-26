@@ -7,8 +7,4 @@ public interface RenderableSecret
 
     public int getLayoutId();
 
-    public int getKeyResourceId();
-
-    public int getValueResourceId();
-
 }

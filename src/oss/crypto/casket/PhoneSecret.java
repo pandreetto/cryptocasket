@@ -23,12 +23,4 @@ public class PhoneSecret
         return R.layout.secretphone;
     }
 
-    public int getKeyResourceId() {
-        return R.id.phone_key;
-    }
-
-    public int getValueResourceId() {
-        return R.id.phone_value;
-    }
-
 }

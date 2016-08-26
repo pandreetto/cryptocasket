@@ -23,14 +23,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class SecretActivity
@@ -41,6 +44,8 @@ public class SecretActivity
     private String login;
 
     private String password;
+
+    private String secretId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,9 +59,9 @@ public class SecretActivity
         Intent intent = this.getIntent();
         login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
-        String secId = intent.getStringExtra(CasketConstants.SECID_TAG);
+        secretId = intent.getStringExtra(CasketConstants.SECID_TAG);
 
-        if (login == null || password == null || secId == null) {
+        if (login == null || password == null || secretId == null) {
 
             showError(R.string.nologorpwd);
 
@@ -66,7 +71,7 @@ public class SecretActivity
 
                 SecretManager secMan = SecretManager.getManager(this, login, password);
 
-                GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secId);
+                GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secretId);
                 SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
                 setListAdapter(sAdapter);
 
@@ -120,28 +125,36 @@ public class SecretActivity
             return true;
         case 2:
 
-            boolean foundSelected = false;
+            ListView interView = this.getListView();
+            boolean needRefresh = false;
 
-            for (int k = viewBox.getChildCount() - 1; k >= 0; k--) {
-                View tmpView = viewBox.getChildAt(k);
-                if (tmpView.isSelected()) {
-                    viewBox.removeViewAt(k);
-                    foundSelected = true;
+            try {
+                SecretManager manager = SecretManager.getManager(this, login, password);
+                GroupOfSecret secretCard = (GroupOfSecret) manager.getSecret(secretId);
+
+                for (int k = 0; k < interView.getChildCount(); k++) {
+                    LinearLayout llItem = (LinearLayout) interView.getChildAt(k);
+                    CheckBox cBox = (CheckBox) llItem.findViewById(R.id.prop_check);
+                    TextView tView = (TextView) llItem.findViewById(R.id.prop_key);
+                    if (cBox.isChecked()) {
+                        String secItem = tView.getText().toString();
+                        secretCard.remove(secItem);
+                        needRefresh = true;
+                        Log.d("SecretProperty", secretId + ": removed " + secItem);
+                    }
                 }
+
+                if (needRefresh) {
+                    manager.putSecret(secretCard);
+                    SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
+                    setListAdapter(sAdapter);
+                }
+
+            } catch (SecretException sEx) {
+                showError(R.string.casket_operr);
             }
 
-            if (foundSelected) {
-                try {
-                    Secret newSecret = SecretViewFactory.getSecret(viewBox);
-                    SecretManager.getManager(this, login, password).putSecret(newSecret);
-                } catch (Exception ex) {
-                    showError(R.string.casket_operr);
-                }
-            }
-
-            finish();
-
-            return true;
+            break;
 
         case 3:
             return true;
@@ -218,10 +231,10 @@ public class SecretActivity
             RenderableSecret tmpsec = (RenderableSecret) secrets.get(position);
             LinearLayout result = (LinearLayout) inflater.inflate(tmpsec.getLayoutId(), null);
 
-            TextView keyText = (TextView) result.findViewById(tmpsec.getKeyResourceId());
+            TextView keyText = (TextView) result.findViewById(R.id.prop_key);
             keyText.setText(tmpsec.getId());
 
-            TextView valueText = (TextView) result.findViewById(tmpsec.getValueResourceId());
+            TextView valueText = (TextView) result.findViewById(R.id.prop_value);
             valueText.setText(tmpsec.getValue());
 
             return result;

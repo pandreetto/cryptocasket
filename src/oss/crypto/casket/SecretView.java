@@ -16,6 +16,7 @@
 
 package oss.crypto.casket;
 
+@Deprecated
 public interface SecretView {
 
     public Secret buildSecret();

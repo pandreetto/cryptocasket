@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+@Deprecated
 public class GroupOfSecretView
     extends LinearLayout
     implements SecretView {
@@ -69,7 +70,7 @@ public class GroupOfSecretView
             View vChild = this.getChildAt(k);
             Secret tmps = SecretViewFactory.getSecret(vChild);
             if (tmps != null) {
-                gSecret.addSecret(tmps);
+                gSecret.add(tmps);
             }
         }
         return gSecret;

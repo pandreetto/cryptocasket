@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+@Deprecated
 public class PhoneSecretView
     extends PropertySecretView {
 

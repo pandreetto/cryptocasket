@@ -45,14 +45,16 @@ public class GroupOfSecret
         this.id = id;
     }
 
-    @Deprecated
-    public void addSecret(Secret sec) {
-        super.add(sec);
-    }
+    public void remove(String secId) {
+        Secret tmpsec = null;
+        for (Secret sec : this) {
+            if (sec.getId().equals(secId)) {
+                tmpsec = sec;
+                break;
+            }
+        }
 
-    @Deprecated
-    public void removeSecret(Secret sec) {
-        super.remove(sec);
+        super.remove(tmpsec);
     }
 
     @Deprecated
