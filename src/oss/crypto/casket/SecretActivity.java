@@ -47,9 +47,13 @@ public class SecretActivity
 
     private String secretId;
 
+    private LayoutInflater inflater;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -74,6 +78,11 @@ public class SecretActivity
                 GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secretId);
                 SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
                 setListAdapter(sAdapter);
+
+                View cardHeader = inflater.inflate(R.layout.cardheader, null);
+                TextView cardName = (TextView) cardHeader.findViewById(R.id.card_header);
+                cardName.setText(secretId);
+                getListView().addHeaderView(cardHeader);
 
             } catch (SecretException sEx) {
 
@@ -204,11 +213,8 @@ public class SecretActivity
 
         private GroupOfSecret secrets;
 
-        private LayoutInflater inflater;
-
         public SecretTableAdapter(GroupOfSecret secrets, SecretActivity context) {
             this.secrets = secrets;
-            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         public int getCount() {
