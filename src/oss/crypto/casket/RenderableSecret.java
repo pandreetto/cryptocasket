@@ -5,6 +5,8 @@ public interface RenderableSecret
 
     public String getValue();
 
+    public void setValue(String value);
+
     public int getLayoutId();
 
 }

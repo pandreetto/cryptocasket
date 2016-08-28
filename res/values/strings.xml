@@ -41,10 +41,15 @@
     <string name="existscrypto">Crypto file already exists</string>
     <string name="unknwsecret">Secret unknown</string>
     <string name="noupdatecrypto">Cannot update crypto file</string>
+    <string name="unknwrenderable">Type of secret unknown</string>
     
     <string name="manager_err1">Error querying secret manager</string>
     
     <string name="cryptotitle">Crypto Casket</string>
     <string name="enter_seckey">Enter secret ID</string>
+    <string name="enter_prop_name">Enter property name</string>
+    <string name="enter_prop_value">Enter property value</string>
+    <string name="enter_phone_name">Enter phone name</string>
+    <string name="enter_phone_value">Enter phone value</string>
     
 </resources>

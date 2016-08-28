@@ -22,6 +22,8 @@ public interface Secret {
 
     public String getId();
 
+    public void setId(String id);
+
     public void processStartElement(String qName, Attributes attributes);
 
     public void processEndElement(String qName);

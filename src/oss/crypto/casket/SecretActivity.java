@@ -16,12 +16,16 @@
 
 package oss.crypto.casket;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,6 +35,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -38,8 +43,6 @@ import android.widget.TextView;
 
 public class SecretActivity
     extends ListActivity {
-
-    private GroupOfSecretView viewBox = null;
 
     private String login;
 
@@ -56,6 +59,7 @@ public class SecretActivity
         inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public void onStart() {
         super.onStart();
@@ -105,14 +109,9 @@ public class SecretActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.add(Menu.NONE, 1, Menu.NONE, R.string.save_all);
-        menu.add(Menu.NONE, 2, Menu.NONE, R.string.rmv_all);
-        menu.add(Menu.NONE, 3, Menu.NONE, R.string.desel_all);
-
-        if (viewBox instanceof GroupOfSecretView) {
-            menu.add(Menu.NONE, 4, Menu.NONE, R.string.add_prop);
-            menu.add(Menu.NONE, 5, Menu.NONE, R.string.add_phone);
-        }
+        menu.add(Menu.NONE, 1, Menu.NONE, R.string.add_prop);
+        menu.add(Menu.NONE, 2, Menu.NONE, R.string.add_phone);
+        menu.add(Menu.NONE, 3, Menu.NONE, R.string.rmv_all);
 
         return true;
     }
@@ -122,17 +121,17 @@ public class SecretActivity
         switch (item.getItemId()) {
         case 1:
 
-            try {
-                Secret newSecret = SecretViewFactory.getSecret(viewBox);
-                SecretManager.getManager(this, login, password).putSecret(newSecret);
-            } catch (SecretException sEx) {
-                showError(sEx.getMsgRef());
-            }
+            AddDialogFragment propDialog = new AddDialogFragment(this, R.layout.dialog_newprop);
+            propDialog.show(getFragmentManager(), "ADDPROPERTY");
+            break;
 
-            finish();
-
-            return true;
         case 2:
+
+            AddDialogFragment phoneDialog = new AddDialogFragment(this, R.layout.dialog_newphone);
+            phoneDialog.show(getFragmentManager(), "ADDPHONE");
+            break;
+
+        case 3:
 
             ListView interView = this.getListView();
             boolean needRefresh = false;
@@ -141,7 +140,7 @@ public class SecretActivity
                 SecretManager manager = SecretManager.getManager(this, login, password);
                 GroupOfSecret secretCard = (GroupOfSecret) manager.getSecret(secretId);
 
-                for (int k = 0; k < interView.getChildCount(); k++) {
+                for (int k = 1; k < interView.getChildCount(); k++) {
                     LinearLayout llItem = (LinearLayout) interView.getChildAt(k);
                     CheckBox cBox = (CheckBox) llItem.findViewById(R.id.prop_check);
                     TextView tView = (TextView) llItem.findViewById(R.id.prop_key);
@@ -165,29 +164,43 @@ public class SecretActivity
 
             break;
 
-        case 3:
-            return true;
-
-        case 4:
-
-            GroupOfSecretView gView = (GroupOfSecretView) viewBox;
-            PropertySecretView pView = new PropertySecretView(this);
-            gView.addView(pView);
-            return true;
-
-        case 5:
-
-            GroupOfSecretView gView2 = (GroupOfSecretView) viewBox;
-            PhoneSecretView phView = new PhoneSecretView(this);
-            gView2.addView(phView);
-            return true;
-
         }
+
         return false;
     }
 
-    public void callPhone(View phoneView) {
+    public void addSecretItem(int type, String secKey, String secValue) {
+        try {
+            SecretManager manager = SecretManager.getManager(this, login, password);
+            GroupOfSecret secretCard = (GroupOfSecret) manager.getSecret(secretId);
+            RenderableSecret rSecret = null;
 
+            if (type == R.layout.dialog_newprop) {
+                rSecret = new PropertySecret();
+            } else if (type == R.layout.dialog_newphone) {
+                rSecret = new PhoneSecret();
+            } else {
+                throw new SecretException(R.string.unknwrenderable);
+            }
+
+            rSecret.setId(secKey);
+            rSecret.setValue(secValue);
+            secretCard.add(rSecret);
+
+            manager.putSecret(secretCard);
+            SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
+            setListAdapter(sAdapter);
+
+        } catch (SecretException sEx) {
+            showError(R.string.casket_operr);
+        }
+    }
+
+    public void callPhone(View phoneView) {
+        String phoneNum = ((TextView) phoneView).getText().toString();
+        Uri number = Uri.parse("tel:" + phoneNum);
+        Intent callIntent = new Intent(Intent.ACTION_DIAL, number);
+        startActivity(callIntent);
     }
 
     private void showError(int msgId) {
@@ -209,6 +222,7 @@ public class SecretActivity
     }
 
     private class SecretTableAdapter
+
         implements ListAdapter {
 
         private GroupOfSecret secrets;
@@ -233,6 +247,7 @@ public class SecretActivity
             return Adapter.IGNORE_ITEM_VIEW_TYPE;
         }
 
+        @SuppressLint("ViewHolder")
         public View getView(int position, View convertView, ViewGroup parent) {
             RenderableSecret tmpsec = (RenderableSecret) secrets.get(position);
             LinearLayout result = (LinearLayout) inflater.inflate(tmpsec.getLayoutId(), null);
@@ -280,4 +295,44 @@ public class SecretActivity
 
     }
 
+    private class AddDialogFragment
+        extends DialogFragment {
+
+        private SecretActivity context;
+
+        private View dialogView;
+
+        private int layoutId;
+
+        public AddDialogFragment(SecretActivity secAct, int layoutId) {
+            super();
+            context = secAct;
+            this.layoutId = layoutId;
+        }
+
+        @SuppressLint("InflateParams")
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+            dialogView = inflater.inflate(layoutId, null);
+            builder.setView(dialogView);
+
+            builder.setPositiveButton(R.string.ok_dbtn, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    EditText secKeyView = (EditText) dialogView.findViewById(R.id.new_name_cnt);
+                    EditText secValueView = (EditText) dialogView.findViewById(R.id.new_value_cnt);
+
+                    context.addSecretItem(layoutId, secKeyView.getText().toString(), secValueView.getText().toString());
+                }
+            });
+
+            builder.setNegativeButton(R.string.cancel_btn, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // Nothing to do
+                }
+            });
+
+            return builder.create();
+        }
+    }
 }

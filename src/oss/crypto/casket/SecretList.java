@@ -16,6 +16,7 @@
 
 package oss.crypto.casket;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -43,12 +44,15 @@ public class SecretList
     private String login;
 
     private String password;
+    
+    private LayoutInflater inflater;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
+        inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -199,11 +203,11 @@ public class SecretList
             super(ctx, resource, objects);
         }
 
+        @SuppressLint({ "InflateParams", "ViewHolder" })
         public View getView(int pos, View convView, ViewGroup parent) {
             if (convView != null)
                 return convView;
 
-            LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             LinearLayout result = (LinearLayout) inflater.inflate(R.layout.secretitem, null);
 
             TextView tView = (TextView) result.findViewById(R.id.secret_id);
@@ -224,10 +228,10 @@ public class SecretList
             context = ctx;
         }
 
+        @SuppressLint("InflateParams")
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             dialogView = inflater.inflate(R.layout.dialog_newsec, null);
             builder.setView(dialogView);
 
