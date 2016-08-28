@@ -77,16 +77,19 @@ public class SecretActivity
 
             try {
 
+                ListView interView = this.getListView();
+                if (interView.getChildCount() == 0) {
+                    View cardHeader = inflater.inflate(R.layout.cardheader, null);
+                    TextView cardName = (TextView) cardHeader.findViewById(R.id.card_header);
+                    cardName.setText(secretId);
+                    interView.addHeaderView(cardHeader);
+                }
+
                 SecretManager secMan = SecretManager.getManager(this, login, password);
 
                 GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secretId);
                 SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
                 setListAdapter(sAdapter);
-
-                View cardHeader = inflater.inflate(R.layout.cardheader, null);
-                TextView cardName = (TextView) cardHeader.findViewById(R.id.card_header);
-                cardName.setText(secretId);
-                getListView().addHeaderView(cardHeader);
 
             } catch (SecretException sEx) {
 
