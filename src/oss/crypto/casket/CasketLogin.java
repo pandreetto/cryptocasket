@@ -20,9 +20,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -30,22 +33,31 @@ public class CasketLogin
     extends Activity
     implements DialogInterface.OnClickListener {
 
-    private int currentActionMode;
+    private static final int LOAD_REQUEST_CODE = 90;
+
+    private static final int NEW_REQUEST_CODE = 91;
+
+    private static final String TAG = "CasketLogin";
+
+    private Uri pictureURI;
+
+    private String password;
+
+    private boolean loadMode;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        currentActionMode = CasketConstants.NO_ACTION;
-
         setContentView(R.layout.login);
+        resetView();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-
-        resetView();
+        if (pictureURI == null)
+            resetView();
     }
 
     @Override
@@ -54,24 +66,110 @@ public class CasketLogin
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+
+        // see
+        // https://developer.android.com/guide/topics/providers/document-provider.html
+
+        String pictureName = null;
+
+        if (resultCode != Activity.RESULT_OK) {
+            /*
+             * TODO message
+             */
+            showError(R.string.casket_err);
+        }
+
+        if (resultData == null) {
+            /*
+             * TODO message
+             */
+            showError(R.string.casket_err);
+        }
+
+        pictureURI = resultData.getData();
+        Log.i(TAG, "Selected image " + pictureURI.toString());
+
+        Cursor cursor = getContentResolver().query(pictureURI, null, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                pictureName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+
+                for (int k = 0; k < cursor.getColumnCount(); k++) {
+                    Log.i(TAG, "Found value: " + cursor.getString(k));
+                }
+
+            } else {
+                pictureName = "Unknown image";
+            }
+        } finally {
+            cursor.close();
+        }
+
+        ((TextView) findViewById(R.id.picture_name)).setText(pictureName);
+        Log.i(TAG, "Loaded picture " + pictureName);
+
+        if (requestCode == NEW_REQUEST_CODE) {
+            loadMode = false;
+            ((TextView) findViewById(R.id.repwd_text)).setVisibility(TextView.VISIBLE);
+            ((EditText) findViewById(R.id.repwd_message)).setVisibility(TextView.VISIBLE);
+
+        } else if (requestCode == LOAD_REQUEST_CODE) {
+            loadMode = true;
+        } else {
+            showError(R.string.casket_err);
+        }
+
     }
 
     public void onClick(DialogInterface dialog, int id) {
         resetView();
     }
 
-    public void login(View view) {
-        EditText nLoginValue = (EditText) findViewById(R.id.login_message);
+    public void loadPicture(View view) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+
+        startActivityForResult(intent, LOAD_REQUEST_CODE);
+    }
+
+    public void newPicture(View view) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("image/*");
+
+        startActivityForResult(intent, NEW_REQUEST_CODE);
+    }
+
+    public void goOn(View view) {
+
         EditText nPwdValue = (EditText) findViewById(R.id.pwd_message);
-        String loginName = nLoginValue.getText().toString();
         String pwd = nPwdValue.getText().toString();
+        EditText rePwdValue = (EditText) findViewById(R.id.repwd_message);
+        String rePwd = rePwdValue.getText().toString();
+
+        if (rePwd.trim().length() > 0 && !rePwd.equals(pwd)) {
+            showError(R.string.pwd_mismatch);
+            return;
+        }
+
+        password = pwd;
 
         try {
 
-            SecretManager manager = SecretManager.getManager(this, loginName, pwd);
-            manager.getSecrets();
+            SecretManager manager = SecretManager.getManager();
+            manager.init(this, pictureURI, password, loadMode);
 
         } catch (SecretException sEx) {
 
@@ -85,98 +183,24 @@ public class CasketLogin
         }
 
         Intent intent = new Intent(this, SecretList.class);
-        intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
+        intent.putExtra(CasketConstants.PICT_TAG, pictureURI);
         intent.putExtra(CasketConstants.PWD_TAG, pwd);
 
         startActivity(intent);
-
-    }
-
-    public void goOut(View view) {
-        this.finish();
-    }
-
-    public void registerUser(View view) {
-        showConfirmPwd();
-        currentActionMode = CasketConstants.CREATE_ACTION;
-    }
-
-    public void destroyUser(View view) {
-        showConfirmPwd();
-        currentActionMode = CasketConstants.DESTROY_ACTION;
-    }
-
-    public void doAction(View view) {
-        String loginName = ((EditText) findViewById(R.id.login_message)).getText().toString();
-        String pwd = ((EditText) findViewById(R.id.pwd_message)).getText().toString();
-        String rePwd = ((EditText) findViewById(R.id.repwd_message)).getText().toString();
-
-        if (!pwd.equals(rePwd)) {
-
-            showError(R.string.pwd_mismatch);
-            return;
-        }
-
-        try {
-
-            SecretManager manager = SecretManager.getManager(this, loginName, pwd);
-
-            if (currentActionMode == CasketConstants.DESTROY_ACTION) {
-
-                manager.destroy();
-                resetView();
-
-            } else {
-
-                manager.create();
-
-                Intent intent = new Intent(this, SecretList.class);
-                intent.putExtra(CasketConstants.LOGIN_TAG, loginName);
-                intent.putExtra(CasketConstants.PWD_TAG, pwd);
-
-                startActivity(intent);
-            }
-
-        } catch (SecretException sEx) {
-
-            showError(sEx.getMsgRef());
-
-        }
     }
 
     private void resetView() {
-        currentActionMode = CasketConstants.NO_ACTION;
-
-        hideConfirmPwd();
-
-        ((EditText) findViewById(R.id.login_message)).setText("");
-        ((EditText) findViewById(R.id.pwd_message)).setText("");
-        ((EditText) findViewById(R.id.repwd_message)).setText("");
-    }
-
-    private void hideConfirmPwd() {
-
-        ((Button) findViewById(R.id.destroy_btn)).setVisibility(Button.VISIBLE);
-        ((Button) findViewById(R.id.register_btn)).setVisibility(Button.VISIBLE);
-        ((Button) findViewById(R.id.login_btn)).setVisibility(Button.VISIBLE);
-        ((Button) findViewById(R.id.canc_btn)).setVisibility(Button.VISIBLE);
+        TextView pictText = (TextView) findViewById(R.id.picture_name);
+        pictText.setText("");
+        EditText pwdMsg = (EditText) findViewById(R.id.pwd_message);
+        pwdMsg.setText("");
         ((TextView) findViewById(R.id.repwd_text)).setVisibility(TextView.GONE);
-        ((EditText) findViewById(R.id.repwd_message)).setVisibility(EditText.GONE);
-        ((Button) findViewById(R.id.confirm_btn)).setVisibility(Button.GONE);
-        ((Button) findViewById(R.id.discard_btn)).setVisibility(Button.GONE);
+        EditText rePwdMsg = (EditText) findViewById(R.id.repwd_message);
+        rePwdMsg.setText("");
+        rePwdMsg.setVisibility(TextView.GONE);
 
-    }
-
-    private void showConfirmPwd() {
-
-        ((Button) findViewById(R.id.destroy_btn)).setVisibility(Button.GONE);
-        ((Button) findViewById(R.id.register_btn)).setVisibility(Button.GONE);
-        ((Button) findViewById(R.id.login_btn)).setVisibility(Button.GONE);
-        ((Button) findViewById(R.id.canc_btn)).setVisibility(Button.GONE);
-        ((TextView) findViewById(R.id.repwd_text)).setVisibility(TextView.VISIBLE);
-        ((EditText) findViewById(R.id.repwd_message)).setVisibility(EditText.VISIBLE);
-        ((Button) findViewById(R.id.confirm_btn)).setVisibility(Button.VISIBLE);
-        ((Button) findViewById(R.id.discard_btn)).setVisibility(Button.VISIBLE);
+        pictureURI = null;
+        password = null;
     }
 
     private void showError(int msgId) {

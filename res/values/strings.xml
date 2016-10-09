@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Crypto Casket</string>
-    <string name="login_text">Login</string>
     <string name="pwd_text">Password</string>
     <string name="repwd_text">Confirm password</string>
-    <string name="login_btn">Login</string>
+    <string name="load_btn">Load picture</string>
+    <string name="new_btn">New picture</string>
     <string name="cancel_btn">Cancel</string>
-    <string name="register_btn">Register</string>
-    <string name="destroy_btn">Destroy</string>
-    <string name="confirm_btn">Confirm</string>
-    <string name="discard_btn">Discard</string>
+    <string name="ok_btn">Go</string>
     <string name="add_secret">Add secret</string>
     <string name="rmv_secret">Remove secrets</string>
     <string name="rmv_all">Remove all</string>

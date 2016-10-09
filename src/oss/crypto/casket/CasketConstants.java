@@ -18,7 +18,7 @@ package oss.crypto.casket;
 
 public class CasketConstants {
 
-    public final static String LOGIN_TAG = "oss.crypto.casket.LOGIN";
+    public final static String PICT_TAG = "oss.crypto.casket.PICTURE";
 
     public final static String PWD_TAG = "oss.crypto.casket.PWD";
 

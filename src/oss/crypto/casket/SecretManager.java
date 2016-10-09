@@ -17,10 +17,9 @@
 package oss.crypto.casket;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -35,7 +34,9 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
+import oss.crypto.casket.stego.bitmap.StegoCodec;
 
 public class SecretManager {
 
@@ -53,13 +54,21 @@ public class SecretManager {
 
     private static byte[] INITVECT = { 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
+    private static final int CACHE_IDLE = 0;
+
+    private static final int CACHE_STABLE = 1;
+
+    private static final int CACHE_TOFLUSH = 2;
+
     private Context context;
 
-    private String login;
+    private Uri pictureURI;
 
     private String pwd;
 
     private ArrayList<Secret> secretCache;
+
+    private int cacheStatus;
 
     private Cipher setupCipher(int type, String pwd)
         throws SecretException {
@@ -80,28 +89,117 @@ public class SecretManager {
         }
     }
 
-    private ArrayList<Secret> readSecrets()
+    public void changePassword(String newPwd)
+        throws SecretException {
+        /*
+         * TODO investigate
+         */
+    }
+
+    public Secret[] getSecrets()
         throws SecretException {
 
-        if (secretCache != null) {
-            return secretCache;
+        if (secretCache == null)
+            loadSecrets();
+
+        Secret[] result = new Secret[secretCache.size()];
+        secretCache.toArray(result);
+        return result;
+
+    }
+
+    public Secret getSecret(String secretId)
+        throws SecretException {
+
+        if (secretCache == null)
+            loadSecrets();
+
+        for (Secret tmpsec : secretCache) {
+            if (tmpsec.getId().equals(secretId)) {
+                return tmpsec;
+            }
         }
 
-        ArrayList<Secret> result = null;
+        throw new SecretException(R.string.unknwsecret);
+    }
+
+    public void putSecret(Secret secret)
+        throws SecretException {
+
+        if (secretCache == null)
+            loadSecrets();
+
+        int idx = 0;
+        for (Secret secItem : secretCache) {
+            if (secret.getId().equals(secItem.getId())) {
+                break;
+            }
+            idx++;
+        }
+
+        if (idx == secretCache.size()) {
+            secretCache.add(secret);
+        } else {
+            secretCache.set(idx, secret);
+        }
+        cacheStatus = CACHE_TOFLUSH;
+
+    }
+
+    public void removeSecret(String secretId)
+        throws SecretException {
+
+        if (secretCache == null)
+            loadSecrets();
+
+        int idx = 0;
+        for (Secret secItem : secretCache) {
+            if (secretId.equals(secItem.getId())) {
+                break;
+            } else {
+                idx++;
+            }
+        }
+
+        if (idx < secretCache.size()) {
+            secretCache.remove(idx);
+            cacheStatus = CACHE_TOFLUSH;
+        }
+
+    }
+
+    public void removeSecret(Secret secret)
+        throws SecretException {
+        removeSecret(secret.getId());
+    }
+
+    public void flushSecrets()
+        throws SecretException {
+        writeSecrets();
+        cacheStatus = CACHE_STABLE;
+    }
+
+    private void loadSecrets()
+        throws SecretException {
+
         BufferedReader reader = null;
-        FileInputStream fIn = null;
 
         SecretParser parser = null;
 
         try {
+
+            byte[] cryptoData = StegoCodec.decode(context, pictureURI);
+
             Cipher cipher = setupCipher(Cipher.DECRYPT_MODE, this.pwd);
-            fIn = context.openFileInput(this.login + ".crypto");
-            CipherInputStream cIn = new CipherInputStream(fIn, cipher);
+
+            ByteArrayInputStream binStream = new ByteArrayInputStream(cryptoData);
+            CipherInputStream cIn = new CipherInputStream(binStream, cipher);
             reader = new BufferedReader(new InputStreamReader(cIn));
 
             parser = new SecretParser(reader);
             parser.parse();
-            result = parser.getSecrets();
+            secretCache = parser.getSecrets();
+            cacheStatus = CACHE_STABLE;
 
         } catch (FileNotFoundException fEx) {
 
@@ -119,190 +217,78 @@ public class SecretManager {
                 } catch (IOException ioEx) {
                     Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
                 }
-            } else if (fIn != null) {
-                try {
-                    fIn.close();
-                } catch (IOException ioEx) {
-                    Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
-                }
             }
         }
-        return result;
+
     }
 
-    private void writeSecrets(ArrayList<Secret> sList)
+    private void writeSecrets()
         throws SecretException {
-        FileOutputStream fOut = null;
         SecretWriter writer = null;
 
+        if (cacheStatus < CACHE_TOFLUSH)
+            return;
+
+        Log.i("SecretManager", "Called flush");
         try {
             Cipher cipher = setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
 
-            fOut = context.openFileOutput(login + ".crypto.new", Context.MODE_PRIVATE);
-            CipherOutputStream cOut = new CipherOutputStream(fOut, cipher);
+            ByteArrayOutputStream boutStream = new ByteArrayOutputStream();
+            CipherOutputStream cOut = new CipherOutputStream(boutStream, cipher);
             writer = new SecretWriter(cOut);
 
-            for (Secret secItem : sList) {
+            for (Secret secItem : secretCache) {
                 Log.d(SecretManager.class.getName(), secItem.toXML());
                 writer.write(secItem);
             }
 
-        } catch (FileNotFoundException fEx) {
+            StegoCodec.encode(context, pictureURI, boutStream.toByteArray());
 
-            Log.e(SecretManager.class.getName(), fEx.getMessage(), fEx);
+            Log.i("SecretManager", "Complete secret flush");
+
+        } catch (IOException ioEx) {
+
+            Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
             throw new SecretException(R.string.nocryptofile);
 
         } finally {
             if (writer != null) {
                 writer.close();
-            } else if (fOut != null) {
-                try {
-                    fOut.close();
-                } catch (IOException ioEx) {
-                    Log.e(SecretManager.class.getName(), ioEx.getMessage(), ioEx);
-                }
             }
         }
 
-        File srcFile = new File(context.getFilesDir(), login + ".crypto.new");
-        File tgtFile = new File(context.getFilesDir(), login + ".crypto");
-
-        if (!srcFile.renameTo(tgtFile)) {
-            throw new SecretException(R.string.noupdatecrypto);
-        }
-
-        secretCache = sList;
     }
 
-    protected SecretManager(Context ctx, String login, String pwd) throws SecretException {
+    public void init(Context ctx, Uri pictureURI, String pwd, boolean loadOnInit)
+        throws SecretException {
 
-        this.context = ctx;
-        this.login = login;
-        this.pwd = pwd;
-        secretCache = null;
-
-        if (login == null || login.trim().length() == 0 || pwd == null || pwd.trim().length() == 0) {
+        if (pictureURI == null || pwd == null || pwd.trim().length() == 0) {
             throw new SecretException(R.string.nologorpwd);
         }
 
-        File workDir = context.getFilesDir();
-        File cryptoFile = new File(workDir, login + ".crypto");
-
-        Log.d(SecretManager.class.getName(), "Cryptofile: " + cryptoFile.getAbsolutePath());
-
-    }
-
-    public void create()
-        throws SecretException {
-        File workDir = context.getFilesDir();
-        File cryptoFile = new File(workDir, login + ".crypto");
-
-        if (cryptoFile.exists()) {
-            throw new SecretException(R.string.existscrypto);
-        }
-
-        ArrayList<Secret> sList = new ArrayList<Secret>(0);
-        writeSecrets(sList);
-    }
-
-    public void destroy()
-        throws SecretException {
-        File srcFile = new File(login + ".crypto");
-        if (!srcFile.delete()) {
-            throw new SecretException(R.string.noupdatecrypto);
-        }
-    }
-
-    public void changePassword(String newPwd)
-        throws SecretException {
-        ArrayList<Secret> resList = readSecrets();
-        String oldPwd = pwd;
-        try {
-            pwd = newPwd;
-            writeSecrets(resList);
-            oldPwd = null;
-        } finally {
-            if (oldPwd != null) {
-                pwd = oldPwd;
-            }
-        }
-    }
-
-    public Secret[] getSecrets()
-        throws SecretException {
-
-        ArrayList<Secret> resList = readSecrets();
-        Secret[] result = new Secret[resList.size()];
-        resList.toArray(result);
-        return result;
-
-    }
-
-    public Secret getSecret(String secretId)
-        throws SecretException {
-        ArrayList<Secret> resList = readSecrets();
-        for (Secret tmpsec : resList) {
-            if (tmpsec.getId().equals(secretId)) {
-                return tmpsec;
-            }
-        }
-
-        throw new SecretException(R.string.unknwsecret);
-    }
-
-    public void putSecret(Secret secret)
-        throws SecretException {
-        int idx = 0;
-        ArrayList<Secret> resList = readSecrets();
-        for (Secret secItem : resList) {
-            if (secret.getId().equals(secItem.getId())) {
-                break;
-            }
-            idx++;
-        }
-
-        if (idx == resList.size()) {
-            resList.add(secret);
+        this.context = ctx;
+        this.pictureURI = pictureURI;
+        this.pwd = pwd;
+        if (loadOnInit) {
+            loadSecrets();
         } else {
-            resList.set(idx, secret);
-        }
-        writeSecrets(resList);
-
-    }
-
-    public void removeSecret(String secretId)
-        throws SecretException {
-        ArrayList<Secret> resList = readSecrets();
-        int idx = 0;
-        boolean found = false;
-        for (Secret secItem : resList) {
-            if (secretId.equals(secItem.getId())) {
-                found = true;
-                break;
-            } else {
-                idx++;
-            }
-        }
-
-        if (found) {
-            resList.remove(idx);
-            writeSecrets(resList);
+            secretCache = new ArrayList<Secret>();
+            cacheStatus = CACHE_STABLE;
         }
 
     }
 
-    public void removeSecret(Secret secret)
-        throws SecretException {
-        removeSecret(secret.getId());
+    protected SecretManager() {
+        cacheStatus = CACHE_IDLE;
     }
 
     private static SecretManager theManager = null;
 
-    public static SecretManager getManager(Context ctx, String login, String pwd)
+    public static SecretManager getManager()
         throws SecretException {
 
-        if (theManager == null || (theManager.login != login && theManager.pwd != pwd)) {
-            theManager = new SecretManager(ctx, login, pwd);
+        if (theManager == null) {
+            theManager = new SecretManager();
         }
 
         return theManager;

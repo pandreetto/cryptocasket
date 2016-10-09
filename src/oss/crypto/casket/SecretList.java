@@ -24,6 +24,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -41,10 +42,10 @@ import android.widget.TextView;
 public class SecretList
     extends ListActivity {
 
-    private String login;
+    private Uri pictureURI;
 
     private String password;
-    
+
     private LayoutInflater inflater;
 
     @Override
@@ -61,12 +62,12 @@ public class SecretList
         super.onStart();
 
         Intent intent = this.getIntent();
-        login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
+        pictureURI = intent.getParcelableExtra(CasketConstants.PICT_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
 
         try {
 
-            Secret[] secrets = SecretManager.getManager(this, login, password).getSecrets();
+            Secret[] secrets = SecretManager.getManager().getSecrets();
 
             SecretArrayAdapter<Secret> adapter = new SecretArrayAdapter<Secret>(this, R.layout.secretitem, secrets);
             setListAdapter(adapter);
@@ -116,7 +117,7 @@ public class SecretList
             boolean needRefresh = false;
 
             try {
-                SecretManager manager = SecretManager.getManager(this, login, password);
+                SecretManager manager = SecretManager.getManager();
 
                 for (int k = 0; k < interView.getChildCount(); k++) {
                     LinearLayout llItem = (LinearLayout) interView.getChildAt(k);
@@ -152,7 +153,7 @@ public class SecretList
         TextView tView = (TextView) sView;
         String sId = tView.getText().toString();
         Intent intent = new Intent(this, SecretActivity.class);
-        intent.putExtra(CasketConstants.LOGIN_TAG, login);
+        intent.putExtra(CasketConstants.PICT_TAG, pictureURI);
         intent.putExtra(CasketConstants.PWD_TAG, password);
         intent.putExtra(CasketConstants.SECID_TAG, sId);
         startActivity(intent);
@@ -163,7 +164,7 @@ public class SecretList
             GroupOfSecret gSecret = new GroupOfSecret();
             gSecret.setId(secId);
 
-            SecretManager manager = SecretManager.getManager(this, login, password);
+            SecretManager manager = SecretManager.getManager();
             manager.putSecret(gSecret);
 
         } catch (SecretException sEx) {
@@ -171,7 +172,7 @@ public class SecretList
         }
 
         Intent intent = new Intent(this, SecretActivity.class);
-        intent.putExtra(CasketConstants.LOGIN_TAG, login);
+        intent.putExtra(CasketConstants.PICT_TAG, pictureURI);
         intent.putExtra(CasketConstants.PWD_TAG, password);
         intent.putExtra(CasketConstants.SECID_TAG, secId);
         startActivity(intent);

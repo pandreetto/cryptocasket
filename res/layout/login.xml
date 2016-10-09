@@ -19,22 +19,38 @@
         android:scaleType="fitCenter"
         android:src="@drawable/cc_launcher" />
 
+    <LinearLayout android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+    
+        <Button
+            android:id="@+id/load_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="loadPicture"
+            android:text="@string/load_btn" />
+        
+        <Button
+            android:id="@+id/new_btn"
+            style="android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="newPicture"
+            android:text="@string/new_btn" />
+
+    </LinearLayout>
+    
     <TextView
-        android:id="@+id/login_text"
+        android:id="@+id/picture_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/txtcolor"
-        android:text="@string/login_text" />
+        android:text="" />
     
-    <EditText
-        android:id="@+id/login_message"
-        android:inputType="text|textNoSuggestions"
-        android:hint=""
-        android:textColor="@color/txtcolor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-     <TextView
+    <TextView
         android:id="@+id/pwd_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,55 +65,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-    
-        <Button
-            android:id="@+id/login_btn"
-            style="android:buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="login"
-            android:text="@string/login_btn" />
-        
-	    <Button
-	        android:id="@+id/canc_btn"
-	        style="android:buttonBarButtonStyle"
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:onClick="goOut"
-	        android:text="@string/cancel_btn" />
-
-	</LinearLayout>
-    
-    <LinearLayout android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/register_btn"
-            style="android:buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="registerUser"
-            android:text="@string/register_btn" />
-
-        <Button
-            android:id="@+id/destroy_btn"
-            style="android:buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="destroyUser"
-            android:text="@string/destroy_btn" />
-
-    </LinearLayout>
-    
-    
     <TextView
         android:id="@+id/repwd_text"
         android:layout_width="match_parent"
@@ -114,31 +81,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible" />
-
+    
     <LinearLayout android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content">
-
+    
         <Button
-            android:id="@+id/confirm_btn"
+            android:id="@+id/ok_btn"
             style="android:buttonBarButtonStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:onClick="doAction"
-            android:text="@string/confirm_btn"
-            android:visibility="invisible" />
-	
-	    <Button
-	        android:id="@+id/discard_btn"
-	        style="android:buttonBarButtonStyle"
-	        android:layout_width="0dp"
-	        android:layout_height="wrap_content"
-	        android:layout_weight="1"
-	        android:onClick="goOut"
-	        android:text="@string/discard_btn"
-	        android:visibility="invisible" />
-
+            android:onClick="goOn"
+            android:text="@string/ok_btn" />
+        
     </LinearLayout>
 
 </LinearLayout>

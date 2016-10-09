@@ -44,7 +44,7 @@ import android.widget.TextView;
 public class SecretActivity
     extends ListActivity {
 
-    private String login;
+    private Uri pictureURI;
 
     private String password;
 
@@ -65,11 +65,11 @@ public class SecretActivity
         super.onStart();
 
         Intent intent = this.getIntent();
-        login = intent.getStringExtra(CasketConstants.LOGIN_TAG);
+        pictureURI = intent.getParcelableExtra(CasketConstants.PICT_TAG);
         password = intent.getStringExtra(CasketConstants.PWD_TAG);
         secretId = intent.getStringExtra(CasketConstants.SECID_TAG);
 
-        if (login == null || password == null || secretId == null) {
+        if (pictureURI == null || password == null || secretId == null) {
 
             showError(R.string.nologorpwd);
 
@@ -85,7 +85,7 @@ public class SecretActivity
                     interView.addHeaderView(cardHeader);
                 }
 
-                SecretManager secMan = SecretManager.getManager(this, login, password);
+                SecretManager secMan = SecretManager.getManager();
 
                 GroupOfSecret secretCard = (GroupOfSecret) secMan.getSecret(secretId);
                 SecretTableAdapter sAdapter = new SecretTableAdapter(secretCard, this);
@@ -102,6 +102,17 @@ public class SecretActivity
     @Override
     public void onStop() {
         super.onStop();
+
+        try {
+
+            SecretManager secMan = SecretManager.getManager();
+            secMan.flushSecrets();
+
+        } catch (SecretException sEx) {
+
+            showError(sEx.getMsgRef());
+
+        }
     }
 
     @Override
@@ -140,7 +151,7 @@ public class SecretActivity
             boolean needRefresh = false;
 
             try {
-                SecretManager manager = SecretManager.getManager(this, login, password);
+                SecretManager manager = SecretManager.getManager();
                 GroupOfSecret secretCard = (GroupOfSecret) manager.getSecret(secretId);
 
                 for (int k = 1; k < interView.getChildCount(); k++) {
@@ -174,7 +185,7 @@ public class SecretActivity
 
     public void addSecretItem(int type, String secKey, String secValue) {
         try {
-            SecretManager manager = SecretManager.getManager(this, login, password);
+            SecretManager manager = SecretManager.getManager();
             GroupOfSecret secretCard = (GroupOfSecret) manager.getSecret(secretId);
             RenderableSecret rSecret = null;
 
