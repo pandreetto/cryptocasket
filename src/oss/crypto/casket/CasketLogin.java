@@ -16,10 +16,12 @@
 
 package oss.crypto.casket;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +39,8 @@ public class CasketLogin
 
     private static final int NEW_REQUEST_CODE = 91;
 
+    private static final int PERM_REQUEST_CODE = 92;
+
     private static final String TAG = "CasketLogin";
 
     private Uri pictureURI;
@@ -51,6 +55,16 @@ public class CasketLogin
 
         setContentView(R.layout.login);
         resetView();
+
+        String permTag = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        if (this.checkSelfPermission(permTag) == PackageManager.PERMISSION_DENIED) {
+            if (this.shouldShowRequestPermissionRationale(permTag)) {
+                Log.i(TAG, "Need rationale");
+            } else {
+                this.requestPermissions(new String[] { permTag }, PERM_REQUEST_CODE);
+            }
+        }
+
     }
 
     @Override
@@ -73,6 +87,14 @@ public class CasketLogin
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode != PERM_REQUEST_CODE || grantResults.length == 0
+                || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Cannot work, permissions denied");
+        }
     }
 
     @Override

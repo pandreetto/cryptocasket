@@ -2,6 +2,7 @@ package oss.crypto.casket.stego.bitmap;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +10,9 @@ import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 
 public class StegoCodec {
@@ -135,13 +138,21 @@ public class StegoCodec {
         secretStream.close();
         pMux.close();
 
-        parcelFileDescriptor = ctx.getContentResolver().openFileDescriptor(pictureURI, "w");
-        fileDescriptor = parcelFileDescriptor.getFileDescriptor();
-
+        File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        filePath.mkdirs();
+        File imageFile = new File(filePath, "mypict.png");
         FileOutputStream fOut = null;
         try {
-            fOut = new FileOutputStream(fileDescriptor);
-            srcImg.compress(Bitmap.CompressFormat.PNG, 90, fOut);
+
+            fOut = new FileOutputStream(imageFile);
+            tgtImg.compress(Bitmap.CompressFormat.PNG, 90, fOut);
+
+            MediaScannerConnection.scanFile(ctx, new String[] { imageFile.getAbsolutePath() }, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                        }
+                    });
+
         } finally {
             if (fOut != null) {
                 try {
