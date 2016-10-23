@@ -6,14 +6,18 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.provider.OpenableColumns;
+import android.util.Log;
 
 public class StegoCodec {
 
@@ -138,9 +142,26 @@ public class StegoCodec {
         secretStream.close();
         pMux.close();
 
+        String pictureName = null;
+        Cursor cursor = ctx.getContentResolver().query(pictureURI, null, null, null, null, null);
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                pictureName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+            }
+        } finally {
+            cursor.close();
+        }
+
+        if (pictureName == null) {
+            pictureName = UUID.randomUUID() + ".png";
+        } else {
+            pictureName = pictureName.subSequence(0, pictureName.lastIndexOf('.')) + ".png";
+        }
+        Log.d("StegoCodec", "Writing " + pictureName);
+
         File filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         filePath.mkdirs();
-        File imageFile = new File(filePath, "mypict.png");
+        File imageFile = new File(filePath, pictureName);
         FileOutputStream fOut = null;
         try {
 

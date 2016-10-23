@@ -125,11 +125,8 @@ public class CasketLogin
         Cursor cursor = getContentResolver().query(pictureURI, null, null, null, null, null);
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                pictureName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
 
-                for (int k = 0; k < cursor.getColumnCount(); k++) {
-                    Log.i(TAG, "Found value: " + cursor.getString(k));
-                }
+                pictureName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
 
             } else {
                 pictureName = "Unknown image";
@@ -139,7 +136,6 @@ public class CasketLogin
         }
 
         ((TextView) findViewById(R.id.picture_name)).setText(pictureName);
-        Log.i(TAG, "Loaded picture " + pictureName);
 
         if (requestCode == NEW_REQUEST_CODE) {
             loadMode = false;
