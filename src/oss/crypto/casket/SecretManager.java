@@ -229,7 +229,6 @@ public class SecretManager {
         if (cacheStatus < CACHE_TOFLUSH)
             return;
 
-        Log.i("SecretManager", "Called flush");
         try {
             Cipher cipher = setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
 
@@ -241,10 +240,10 @@ public class SecretManager {
                 Log.d(SecretManager.class.getName(), secItem.toXML());
                 writer.write(secItem);
             }
+            writer.close();
+            writer = null;
 
             StegoCodec.encode(context, pictureURI, boutStream.toByteArray());
-
-            Log.i("SecretManager", "Complete secret flush");
 
         } catch (IOException ioEx) {
 

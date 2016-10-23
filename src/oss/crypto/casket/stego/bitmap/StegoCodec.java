@@ -54,7 +54,7 @@ public class StegoCodec {
         boolean readHdr = true;
         boolean stop = false;
         int size = 0;
-        PixelDemux sDemux = new PixelDemux(hdrStream, 4);
+        PixelDemux sDemux = new PixelDemux(hdrStream, HEADER_TPL.length());
         PixelDemux pDemux = null;
         for (int y = 0; y < tgtImg.getHeight(); y++) {
             for (int x = 0; x < tgtImg.getWidth(); x++) {

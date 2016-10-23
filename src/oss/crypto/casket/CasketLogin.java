@@ -200,6 +200,7 @@ public class CasketLogin
 
         } catch (Exception ex) {
 
+            Log.e(TAG, ex.getMessage(), ex);
             showError(R.string.casket_err);
             return;
         }
