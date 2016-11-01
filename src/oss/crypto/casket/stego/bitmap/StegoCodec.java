@@ -8,6 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,35 +22,58 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import oss.crypto.casket.SecretException;
+import oss.crypto.casket.crypto.CryptoUtils;
 
 public class StegoCodec {
 
-    private static final String HEADER_TPL = "size----";
+    private static final int MD_SIZE = 48;
 
-    public static byte[] encodeHeader(int size) {
-        byte[] result = HEADER_TPL.getBytes();
-        result[4] = (byte) ((size & 0xff000000) >> 24);
-        result[5] = (byte) ((size & 0xff0000) >> 16);
-        result[6] = (byte) ((size & 0xff00) >> 8);
-        result[7] = (byte) (size & 0xff);
-        return result;
+    public static byte[] encodeHeader(int size, String pwd)
+        throws IOException, SecretException {
+
+        Cipher cipher = CryptoUtils.setupCipher(Cipher.ENCRYPT_MODE, pwd);
+        ByteArrayOutputStream boutStream = new ByteArrayOutputStream();
+        CipherOutputStream cOut = new CipherOutputStream(boutStream, cipher);
+
+        String tmps = UUID.randomUUID().toString();
+        byte[] clearHdr = tmps.getBytes();
+
+        clearHdr[4] = (byte) ((size & 0xff000000) >> 24);
+        clearHdr[5] = (byte) ((size & 0xff0000) >> 16);
+        clearHdr[6] = (byte) ((size & 0xff00) >> 8);
+        clearHdr[7] = (byte) (size & 0xff);
+
+        cOut.write(clearHdr);
+        cOut.close();
+
+        byte[] cryptoHdr = boutStream.toByteArray();
+        Log.d("StegoCodec", "Encoded header with " + cryptoHdr.length + " bytes");
+
+        return cryptoHdr;
     }
 
-    public static int decodeHeader(byte[] bSize) {
-        String prefix = new String(bSize, 0, 4);
-        if (!HEADER_TPL.startsWith(prefix))
-            return -1;
+    public static int decodeHeader(byte[] cryptoHdr, String pwd)
+        throws IOException, SecretException {
+
+        byte[] clearHdr = new byte[MD_SIZE];
+
+        Cipher cipher = CryptoUtils.setupCipher(Cipher.DECRYPT_MODE, pwd);
+        ByteArrayInputStream binStream = new ByteArrayInputStream(cryptoHdr);
+        CipherInputStream cIn = new CipherInputStream(binStream, cipher);
+        cIn.read(clearHdr);
+        cIn.close();
 
         int result = 0;
-        result |= (bSize[4] & 0xff) << 24;
-        result |= (bSize[5] & 0xff) << 16;
-        result |= (bSize[6] & 0xff) << 8;
-        result |= bSize[7] & 0xff;
+        result |= (clearHdr[4] & 0xff) << 24;
+        result |= (clearHdr[5] & 0xff) << 16;
+        result |= (clearHdr[6] & 0xff) << 8;
+        result |= clearHdr[7] & 0xff;
         return result;
     }
 
-    public static byte[] decode(Context ctx, Uri pictureURI)
-        throws IOException {
+    public static byte[] decode(Context ctx, Uri pictureURI, String pwd)
+        throws IOException, SecretException {
 
         ParcelFileDescriptor parcelFileDescriptor = ctx.getContentResolver().openFileDescriptor(pictureURI, "r");
         FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
@@ -58,7 +85,7 @@ public class StegoCodec {
         boolean readHdr = true;
         boolean stop = false;
         int size = 0;
-        PixelDemux sDemux = new PixelDemux(hdrStream, HEADER_TPL.length());
+        PixelDemux sDemux = new PixelDemux(hdrStream, MD_SIZE);
         PixelDemux pDemux = null;
         for (int y = 0; y < tgtImg.getHeight(); y++) {
             for (int x = 0; x < tgtImg.getWidth(); x++) {
@@ -68,7 +95,7 @@ public class StegoCodec {
 
                 if (!readHdr) {
                     if (size == 0) {
-                        size = decodeHeader(hdrStream.toByteArray());
+                        size = decodeHeader(hdrStream.toByteArray(), pwd);
                         if (size < 0)
                             throw new IOException("Cannot find header");
 
@@ -92,15 +119,15 @@ public class StegoCodec {
 
     }
 
-    public static void encode(Context ctx, Uri pictureURI, byte[] payload)
-        throws IOException {
+    public static void encode(Context ctx, Uri pictureURI, byte[] payload, String pwd)
+        throws IOException, SecretException {
 
         ParcelFileDescriptor parcelFileDescriptor = ctx.getContentResolver().openFileDescriptor(pictureURI, "r");
         FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
         Bitmap srcImg = BitmapFactory.decodeFileDescriptor(fileDescriptor);
         Bitmap tgtImg = srcImg.copy(Bitmap.Config.ARGB_8888, true);
 
-        ByteArrayInputStream hdrStream = new ByteArrayInputStream(encodeHeader(payload.length));
+        ByteArrayInputStream hdrStream = new ByteArrayInputStream(encodeHeader(payload.length, pwd));
         PixelMux sMux = new PixelMux(hdrStream);
 
         ByteArrayInputStream secretStream = new ByteArrayInputStream(payload);

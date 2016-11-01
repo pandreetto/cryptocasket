@@ -151,7 +151,7 @@ public class SecretManager {
 
         try {
 
-            byte[] cryptoData = StegoCodec.decode(context, pictureURI);
+            byte[] cryptoData = StegoCodec.decode(context, pictureURI, this.pwd);
 
             Cipher cipher = CryptoUtils.setupCipher(Cipher.DECRYPT_MODE, this.pwd);
 
@@ -206,7 +206,7 @@ public class SecretManager {
             writer.close();
             writer = null;
 
-            StegoCodec.encode(context, pictureURI, boutStream.toByteArray());
+            StegoCodec.encode(context, pictureURI, boutStream.toByteArray(), this.pwd);
 
         } catch (IOException ioEx) {
 
