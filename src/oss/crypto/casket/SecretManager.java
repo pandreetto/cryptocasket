@@ -27,32 +27,14 @@ import java.util.ArrayList;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
+import oss.crypto.casket.crypto.CryptoUtils;
 import oss.crypto.casket.stego.bitmap.StegoCodec;
 
 public class SecretManager {
-
-    private static String PBE_ALGO = "PBEWITHSHAANDTWOFISH-CBC";
-
-    private static String MAIN_ALGO = "AES";
-
-    private static String CIPHER_PARAMS = "AES/CBC/PKCS7Padding";
-
-    private static byte[] SALT = { 0, 0xF, 1, 0xE, 2, 0xD, 3, 0xC, 4, 0xB, 5, 0xA, 6, 9, 7, 8 };
-
-    private static int INT_COUNT = 1000;
-
-    private static int KEY_LENGTH = 256;
-
-    private static byte[] INITVECT = { 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 
     private static final int CACHE_IDLE = 0;
 
@@ -69,25 +51,6 @@ public class SecretManager {
     private ArrayList<Secret> secretCache;
 
     private int cacheStatus;
-
-    private Cipher setupCipher(int type, String pwd)
-        throws SecretException {
-        try {
-            PBEKeySpec pbeKey = new PBEKeySpec(pwd.toCharArray(), SALT, INT_COUNT, KEY_LENGTH);
-
-            SecretKeyFactory factory = SecretKeyFactory.getInstance(PBE_ALGO);
-            SecretKey sKey = factory.generateSecret(pbeKey);
-            SecretKey aesKey = new SecretKeySpec(sKey.getEncoded(), MAIN_ALGO);
-
-            Cipher cipher = Cipher.getInstance(CIPHER_PARAMS);
-            cipher.init(type, aesKey, new IvParameterSpec(INITVECT));
-
-            return cipher;
-        } catch (Exception ex) {
-            Log.e(SecretManager.class.getName(), ex.getMessage(), ex);
-            throw new SecretException(R.string.nosetupchiper);
-        }
-    }
 
     public void changePassword(String newPwd)
         throws SecretException {
@@ -190,7 +153,7 @@ public class SecretManager {
 
             byte[] cryptoData = StegoCodec.decode(context, pictureURI);
 
-            Cipher cipher = setupCipher(Cipher.DECRYPT_MODE, this.pwd);
+            Cipher cipher = CryptoUtils.setupCipher(Cipher.DECRYPT_MODE, this.pwd);
 
             ByteArrayInputStream binStream = new ByteArrayInputStream(cryptoData);
             CipherInputStream cIn = new CipherInputStream(binStream, cipher);
@@ -230,7 +193,7 @@ public class SecretManager {
             return;
 
         try {
-            Cipher cipher = setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
+            Cipher cipher = CryptoUtils.setupCipher(Cipher.ENCRYPT_MODE, this.pwd);
 
             ByteArrayOutputStream boutStream = new ByteArrayOutputStream();
             CipherOutputStream cOut = new CipherOutputStream(boutStream, cipher);
