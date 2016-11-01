@@ -105,18 +105,12 @@ public class CasketLogin
 
         String pictureName = null;
 
-        if (resultCode != Activity.RESULT_OK) {
-            /*
-             * TODO message
-             */
-            showError(R.string.casket_err);
+        if (resultCode != Activity.RESULT_OK || resultData == null) {
+            return;
         }
 
-        if (resultData == null) {
-            /*
-             * TODO message
-             */
-            showError(R.string.casket_err);
+        if (requestCode != NEW_REQUEST_CODE && requestCode != LOAD_REQUEST_CODE) {
+            return;
         }
 
         pictureURI = resultData.getData();
@@ -141,11 +135,8 @@ public class CasketLogin
             loadMode = false;
             ((TextView) findViewById(R.id.repwd_text)).setVisibility(TextView.VISIBLE);
             ((EditText) findViewById(R.id.repwd_message)).setVisibility(TextView.VISIBLE);
-
-        } else if (requestCode == LOAD_REQUEST_CODE) {
-            loadMode = true;
         } else {
-            showError(R.string.casket_err);
+            loadMode = true;
         }
 
     }
@@ -204,6 +195,8 @@ public class CasketLogin
         Intent intent = new Intent(this, SecretList.class);
         intent.putExtra(CasketConstants.PICT_TAG, pictureURI);
         intent.putExtra(CasketConstants.PWD_TAG, pwd);
+
+        pictureURI = null;
 
         startActivity(intent);
     }
